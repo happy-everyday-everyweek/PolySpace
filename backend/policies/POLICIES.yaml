@@ -1,0 +1,71 @@
+policies:
+  - name: file_deletion
+    level: high_risk
+    patterns:
+      - "rm -rf"
+      - "delete.*file"
+      - "remove.*directory"
+      - "shutil\\.rmtree"
+      - "os\\.remove"
+    action: confirm
+    message: "This operation will delete files. Are you sure?"
+
+  - name: system_modification
+    level: high_risk
+    patterns:
+      - "format.*disk"
+      - "registry.*modify"
+      - "sudo.*apt"
+      - "sudo.*yum"
+    action: confirm
+    message: "This operation modifies system settings. Are you sure?"
+
+  - name: credential_access
+    level: high_risk
+    patterns:
+      - "password"
+      - "api.?key"
+      - "secret.?key"
+      - "token"
+      - "credential"
+    action: confirm
+    message: "This operation accesses sensitive credentials. Are you sure?"
+
+  - name: network_access
+    level: medium_risk
+    patterns:
+      - "upload.*data"
+      - "send.*external"
+      - "http.*request"
+    action: notify
+    message: "Data is being sent externally."
+
+  - name: code_execution
+    level: medium_risk
+    patterns:
+      - "exec\\("
+      - "eval\\("
+      - "subprocess"
+      - "os\\.system"
+      - "shell.*exec"
+    action: notify
+    message: "Code execution detected."
+
+  - name: database_modification
+    level: medium_risk
+    patterns:
+      - "drop.*table"
+      - "truncate"
+      - "alter.*table"
+    action: confirm
+    message: "Database modification detected. Are you sure?"
+
+  - name: safe_operations
+    level: low_risk
+    patterns:
+      - "read.*file"
+      - "search"
+      - "list"
+      - "count"
+      - "get"
+    action: allow

@@ -1,0 +1,1391 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolySpace UI Design - 细微优化版</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    /* ========== 配色方案 ========== */
+
+    /* 方案1: 纯净黑白 (默认) */
+    :root[data-theme="mono"] {
+      --primary: #000000;
+      --primary-hover: #333333;
+      --primary-light: rgba(0, 0, 0, 0.06);
+      --accent: #000000;
+
+      --bg-primary: #ffffff;
+      --bg-color: #ffffff;
+      --bg-secondary: #f8f8f8;
+      --bg-tertiary: #f0f0f0;
+
+      --text-primary: #1a1a1a;
+      --text-secondary: #555555;
+      --text-tertiary: #999999;
+      --text-quaternary: #bbbbbb;
+
+      --border-color: #e8e8e8;
+      --border-light: #f2f2f2;
+
+      --card-bg: #ffffff;
+      --card-hover: #fafafa;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.04);
+      --shadow: 0 1px 3px rgba(0,0,0,0.06);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.08);
+    }
+
+    /* 方案2: 暖灰大地 */
+    :root[data-theme="warm"] {
+      --primary: #5c4d3c;
+      --primary-hover: #7a6b5a;
+      --primary-light: rgba(92, 77, 60, 0.08);
+      --accent: #8b7355;
+
+      --bg-primary: #fdfcfa;
+      --bg-color: #fdfcfa;
+      --bg-secondary: #f5f3f0;
+      --bg-tertiary: #ebe8e3;
+
+      --text-primary: #2d2926;
+      --text-secondary: #6b6560;
+      --text-tertiary: #a09991;
+      --text-quaternary: #c4bdb4;
+
+      --border-color: #e8e4df;
+      --border-light: #f0ede8;
+
+      --card-bg: #ffffff;
+      --card-hover: #faf9f7;
+
+      --shadow-sm: 0 1px 2px rgba(45,41,38,0.04);
+      --shadow: 0 1px 3px rgba(45,41,38,0.06);
+      --shadow-md: 0 4px 12px rgba(45,41,38,0.08);
+    }
+
+    /* 方案3: 深蓝科技 */
+    :root[data-theme="navy"] {
+      --primary: #1e3a5f;
+      --primary-hover: #2a4d7a;
+      --primary-light: rgba(30, 58, 95, 0.08);
+      --accent: #3b6cb4;
+
+      --bg-primary: #fafbfd;
+      --bg-color: #fafbfd;
+      --bg-secondary: #f0f4f8;
+      --bg-tertiary: #e2e8f0;
+
+      --text-primary: #1a202c;
+      --text-secondary: #4a5568;
+      --text-tertiary: #8fa0b3;
+      --text-quaternary: #b0c0d0;
+
+      --border-color: #e2e8f0;
+      --border-light: #edf2f7;
+
+      --card-bg: #ffffff;
+      --card-hover: #f7fafc;
+
+      --shadow-sm: 0 1px 2px rgba(30,58,95,0.04);
+      --shadow: 0 1px 3px rgba(30,58,95,0.06);
+      --shadow-md: 0 4px 12px rgba(30,58,95,0.08);
+    }
+
+    /* 方案4: 薄荷清新 */
+    :root[data-theme="mint"] {
+      --primary: #2d6a4f;
+      --primary-hover: #40916c;
+      --primary-light: rgba(45, 106, 79, 0.08);
+      --accent: #52b788;
+
+      --bg-primary: #fbfefd;
+      --bg-color: #fbfefd;
+      --bg-secondary: #f0f7f4;
+      --bg-tertiary: #e0f0e8;
+
+      --text-primary: #1b4332;
+      --text-secondary: #52796f;
+      --text-tertiary: #8fad9f;
+      --text-quaternary: #b8d4c8;
+
+      --border-color: #e0ece6;
+      --border-light: #edf5f1;
+
+      --card-bg: #ffffff;
+      --card-hover: #f8fcfa;
+
+      --shadow-sm: 0 1px 2px rgba(27,67,50,0.04);
+      --shadow: 0 1px 3px rgba(27,67,50,0.06);
+      --shadow-md: 0 4px 12px rgba(27,67,50,0.08);
+    }
+
+    /* 方案5: 紫韵优雅 */
+    :root[data-theme="purple"] {
+      --primary: #4a3f6b;
+      --primary-hover: #5d5280;
+      --primary-light: rgba(74, 63, 107, 0.08);
+      --accent: #7c6ff7;
+
+      --bg-primary: #fcfcfe;
+      --bg-color: #fcfcfe;
+      --bg-secondary: #f5f3f8;
+      --bg-tertiary: #ebe8f0;
+
+      --text-primary: #2d2a33;
+      --text-secondary: #5e5a6b;
+      --text-tertiary: #9b95a8;
+      --text-quaternary: #bdb8c8;
+
+      --border-color: #e8e5ee;
+      --border-light: #f0eef4;
+
+      --card-bg: #ffffff;
+      --card-hover: #faf9fc;
+
+      --shadow-sm: 0 1px 2px rgba(45,42,51,0.04);
+      --shadow: 0 1px 3px rgba(45,42,51,0.06);
+      --shadow-md: 0 4px 12px rgba(45,42,51,0.08);
+    }
+
+    /* 方案6: 暗色模式 */
+    :root[data-theme="dark"] {
+      --primary: #e0e0e0;
+      --primary-hover: #ffffff;
+      --primary-light: rgba(224, 224, 224, 0.1);
+      --accent: #7c6ff7;
+
+      --bg-primary: #121212;
+      --bg-color: #121212;
+      --bg-secondary: #1e1e1e;
+      --bg-tertiary: #2a2a2a;
+
+      --text-primary: #e0e0e0;
+      --text-secondary: #aaaaaa;
+      --text-tertiary: #777777;
+      --text-quaternary: #555555;
+
+      --border-color: #333333;
+      --border-light: #2a2a2a;
+
+      --card-bg: #1e1e1e;
+      --card-hover: #252525;
+
+      --shadow-sm: 0 1px 2px rgba(0,0,0,0.3);
+      --shadow: 0 1px 3px rgba(0,0,0,0.4);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.5);
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: #e0e0e0;
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .mockup-wrapper {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    .mockup-header {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    .mockup-header h1 {
+      font-size: 24px;
+      font-weight: 700;
+      color: #333;
+      margin-bottom: 8px;
+    }
+
+    .mockup-header p {
+      font-size: 13px;
+      color: #888;
+    }
+
+    /* 配色切换 */
+    .theme-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+
+    .theme-btn {
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #ddd;
+      background: white;
+      color: #555;
+    }
+
+    .theme-btn:hover {
+      border-color: #999;
+    }
+
+    .theme-btn.active {
+      background: #333;
+      color: white;
+      border-color: #333;
+    }
+
+    /* 视图切换 */
+    .view-switcher {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .view-btn {
+      padding: 8px 20px;
+      border-radius: 20px;
+      font-size: 13px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: 1px solid #ddd;
+      background: white;
+      color: #555;
+    }
+
+    .view-btn.active {
+      background: #333;
+      color: white;
+      border-color: #333;
+    }
+
+    .view-content { display: none; }
+    .view-content.active { display: block; }
+
+    .mockup-frame {
+      background: var(--bg-primary);
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+      border: 1px solid #ddd;
+    }
+
+    .app-container {
+      display: flex;
+      flex-direction: column;
+      height: 720px;
+      width: 100%;
+    }
+
+    /* ========== Header (保持原结构) ========== */
+    .app-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 48px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--border-color);
+      background: var(--bg-color);
+      flex-shrink: 0;
+    }
+
+    .header-left, .header-right {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    /* 模式切换按钮 - 保持原结构，优化样式 */
+    .mode-toggle-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      padding: 4px 12px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 500;
+      border: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      letter-spacing: -0.2px;
+      height: 32px;
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+    }
+
+    .mode-toggle-btn:hover {
+      background: var(--bg-tertiary);
+    }
+
+    .mode-icon {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 22px;
+      height: 22px;
+    }
+
+    .mode-icon svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .mode-label {
+      font-weight: 600;
+      white-space: nowrap;
+      font-size: 13px;
+    }
+
+    .icon-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 32px;
+      height: 32px;
+      border-radius: 7px;
+      color: var(--text-secondary);
+      background: transparent;
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+    }
+
+    .icon-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .icon-btn svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    /* ========== Body ========== */
+    .app-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    /* ========== Sidebar (保持原结构) ========== */
+    .app-sidebar {
+      width: 280px;
+      background: var(--bg-color);
+      border-right: 1px solid var(--border-color);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .toggle-sidebar-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 28px;
+      height: 28px;
+      border-radius: 6px;
+      color: var(--text-secondary);
+      background: var(--bg-secondary);
+      cursor: pointer;
+      transition: all 0.2s;
+      border: none;
+      z-index: 10;
+    }
+
+    .toggle-sidebar-btn:hover {
+      color: var(--text-primary);
+      background: var(--bg-tertiary);
+    }
+
+    .sidebar-content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 48px 12px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .sidebar-section {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .sidebar-section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      padding: 0 4px;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .quick-action-btn {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 10px;
+      border-radius: 8px;
+      color: var(--text-secondary);
+      background: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      font-size: 13px;
+      text-align: left;
+      border: none;
+    }
+
+    .quick-action-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .quick-action-btn svg {
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+    }
+
+    /* Recommend Card */
+    .recommend-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+    }
+
+    .recommend-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 10px;
+    }
+
+    .recommend-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+    }
+
+    .recommend-badge {
+      font-size: 10px;
+      font-weight: 600;
+      padding: 2px 8px;
+      border-radius: 9999px;
+      background: var(--primary-light);
+      color: var(--accent);
+    }
+
+    .recommend-list {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .recommend-item {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 8px;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: transparent;
+      text-align: left;
+      color: var(--text-secondary);
+      font-size: 13px;
+      width: 100%;
+    }
+
+    .recommend-item:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    /* Encourage Card */
+    .encourage-card {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 14px;
+      position: relative;
+    }
+
+    .encourage-text {
+      font-size: 13px;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .encourage-author {
+      margin-top: 8px;
+      font-size: 11px;
+      color: var(--text-tertiary);
+    }
+
+    /* ========== Main ========== */
+    .app-main {
+      flex: 1;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-secondary);
+    }
+
+    /* ========== Workspace View (保持原结构) ========== */
+    .workspace-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+    }
+
+    .workspace-tabs {
+      display: flex;
+      align-items: center;
+      height: 36px;
+      background: var(--bg-color);
+      border-bottom: 1px solid var(--border-color);
+      padding: 0 6px;
+    }
+
+    .tabs-scroll {
+      display: flex;
+      align-items: center;
+      gap: 1px;
+      overflow-x: auto;
+      flex: 1;
+    }
+
+    .tabs-scroll::-webkit-scrollbar { height: 0; }
+
+    .tab-item {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 10px;
+      border-radius: 6px 6px 0 0;
+      font-size: 12px;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.15s;
+      white-space: nowrap;
+      border-bottom: 2px solid transparent;
+      background: transparent;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+
+    .tab-item:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .tab-item.active {
+      color: var(--text-primary);
+      background: var(--bg-secondary);
+      border-bottom-color: var(--primary);
+    }
+
+    .tab-item svg {
+      width: 13px;
+      height: 13px;
+    }
+
+    .tab-close {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 14px;
+      height: 14px;
+      border-radius: 3px;
+      color: var(--text-tertiary);
+      opacity: 0;
+      transition: all 0.15s;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .tab-item:hover .tab-close {
+      opacity: 1;
+    }
+
+    .tab-close:hover {
+      background: var(--border-color);
+      color: var(--text-primary);
+    }
+
+    .tabs-actions {
+      display: flex;
+      align-items: center;
+      margin-left: 2px;
+    }
+
+    .tab-add-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 5px;
+      color: var(--text-secondary);
+      transition: all 0.15s;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+    }
+
+    .tab-add-btn:hover {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+    }
+
+    .tab-content {
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tab-pane {
+      height: 100%;
+      overflow: auto;
+      padding: 20px;
+    }
+
+    /* Workspace Home */
+    .workspace-home {
+      max-width: 900px;
+    }
+
+    .home-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-primary);
+      margin-bottom: 4px;
+    }
+
+    .home-subtitle {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-bottom: 24px;
+    }
+
+    .section-title {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+    }
+
+    .apps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+      gap: 8px;
+      margin-bottom: 28px;
+    }
+
+    .app-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 6px;
+      padding: 14px 6px;
+      border-radius: 10px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.2s;
+      color: var(--text-secondary);
+      border: none;
+    }
+
+    .app-item:hover {
+      background: var(--card-hover);
+      box-shadow: var(--shadow);
+      color: var(--text-primary);
+    }
+
+    .app-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .app-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .app-name {
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .recent-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .recent-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: 8px;
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      cursor: pointer;
+      transition: all 0.15s;
+    }
+
+    .recent-item:hover {
+      border-color: var(--border-color);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .recent-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 6px;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .recent-icon svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .recent-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .recent-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .recent-meta {
+      font-size: 11px;
+      color: var(--text-tertiary);
+      margin-top: 1px;
+    }
+
+    .recent-time {
+      font-size: 11px;
+      color: var(--text-quaternary);
+      flex-shrink: 0;
+    }
+
+    /* ========== Chat View (保持原结构) ========== */
+    .chat-view {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: var(--bg-primary);
+    }
+
+    .chat-messages {
+      flex: 1;
+      overflow-y: auto;
+      padding: 16px 20%;
+    }
+
+    .empty-state {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+    }
+
+    .greeting-text {
+      font-size: 38px;
+      font-weight: 700;
+      color: var(--text-primary);
+      letter-spacing: -1px;
+    }
+
+    .message {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    .message.user {
+      flex-direction: row-reverse;
+    }
+
+    .message-avatar {
+      width: 30px;
+      height: 30px;
+      border-radius: 50%;
+      background: var(--bg-secondary);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      flex-shrink: 0;
+    }
+
+    .message.user .message-avatar {
+      background: var(--primary);
+      color: var(--bg-primary);
+    }
+
+    .message-content {
+      padding: 10px 14px;
+      border-radius: 12px;
+      font-size: 14px;
+      line-height: 1.6;
+      max-width: 80%;
+    }
+
+    .message.ai .message-content {
+      background: var(--bg-secondary);
+      color: var(--text-primary);
+      border-bottom-left-radius: 4px;
+    }
+
+    .message.user .message-content {
+      background: var(--primary);
+      color: var(--bg-primary);
+      border-bottom-right-radius: 4px;
+    }
+
+    .chat-input-area {
+      padding: 12px 20%;
+      border-top: 1px solid var(--border-color);
+      background: var(--bg-primary);
+    }
+
+    .chat-input-wrapper {
+      display: flex;
+      align-items: flex-end;
+      gap: 8px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 8px 12px;
+      border: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .chat-input-wrapper:focus-within {
+      border-color: var(--border-color);
+      background: var(--bg-primary);
+      box-shadow: var(--shadow-md);
+    }
+
+    .chat-textarea {
+      flex: 1;
+      border: none;
+      background: transparent;
+      resize: none;
+      font-size: 14px;
+      line-height: 1.5;
+      max-height: 100px;
+      min-height: 20px;
+      outline: none;
+      color: var(--text-primary);
+      font-family: inherit;
+    }
+
+    .chat-textarea::placeholder {
+      color: var(--text-quaternary);
+    }
+
+    .input-actions {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-shrink: 0;
+    }
+
+    .input-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 7px;
+      color: var(--text-tertiary);
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+      background: transparent;
+    }
+
+    .input-btn:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    .input-btn.send {
+      background: var(--primary);
+      color: var(--bg-primary);
+    }
+
+    .input-btn.send:hover {
+      background: var(--primary-hover);
+    }
+
+    .input-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .input-hints {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      justify-content: center;
+    }
+
+    .hint-chip {
+      padding: 4px 10px;
+      border-radius: 9999px;
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 11px;
+      cursor: pointer;
+      transition: all 0.15s;
+      border: none;
+    }
+
+    .hint-chip:hover {
+      background: var(--bg-tertiary);
+      color: var(--text-primary);
+    }
+
+    /* 滚动条 */
+    ::-webkit-scrollbar { width: 5px; height: 5px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 9999px; }
+    ::-webkit-scrollbar-thumb:hover { background: var(--text-quaternary); }
+
+    @media (max-width: 1024px) {
+      .chat-messages, .chat-input-area { padding: 16px 10%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="mockup-wrapper">
+    <div class="mockup-header">
+      <h1>PolySpace UI 优化版</h1>
+      <p>保持原有结构，细微优化 + 多配色方案</p>
+    </div>
+
+    <!-- 配色切换 -->
+    <div class="theme-switcher">
+      <button class="theme-btn active" data-theme="mono" onclick="setTheme('mono')">纯净黑白</button>
+      <button class="theme-btn" data-theme="warm" onclick="setTheme('warm')">暖灰大地</button>
+      <button class="theme-btn" data-theme="navy" onclick="setTheme('navy')">深蓝科技</button>
+      <button class="theme-btn" data-theme="mint" onclick="setTheme('mint')">薄荷清新</button>
+      <button class="theme-btn" data-theme="purple" onclick="setTheme('purple')">紫韵优雅</button>
+      <button class="theme-btn" data-theme="dark" onclick="setTheme('dark')">暗色模式</button>
+    </div>
+
+    <!-- 视图切换 -->
+    <div class="view-switcher">
+      <button class="view-btn active" onclick="switchView('workspace')">工作台</button>
+      <button class="view-btn" onclick="switchView('chat')">AI 对话</button>
+    </div>
+
+    <!-- Workspace View -->
+    <div id="view-workspace" class="view-content active">
+      <div class="mockup-frame">
+        <div class="app-container">
+          <!-- Header -->
+          <header class="app-header">
+            <div class="header-left">
+              <button class="mode-toggle-btn">
+                <span class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
+                  </svg>
+                </span>
+                <span class="mode-label">AI Agent</span>
+              </button>
+            </div>
+            <div class="header-right">
+              <button class="icon-btn" title="设置">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="3"/>
+                  <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/>
+                </svg>
+              </button>
+            </div>
+          </header>
+
+          <!-- Body -->
+          <div class="app-body">
+            <!-- Sidebar -->
+            <aside class="app-sidebar">
+              <button class="toggle-sidebar-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <div class="sidebar-content">
+                <div class="sidebar-section">
+                  <h4 class="sidebar-section-title">快捷操作</h4>
+                  <div class="quick-actions">
+                    <button class="quick-action-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                      <span>新建文档</span>
+                    </button>
+                    <button class="quick-action-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                      <span>新建PPT</span>
+                    </button>
+                    <button class="quick-action-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                      <span>新建表格</span>
+                    </button>
+                    <button class="quick-action-btn">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                      <span>新建待办</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="recommend-card">
+                  <div class="recommend-header">
+                    <span class="recommend-title">推荐</span>
+                    <span class="recommend-badge">AI</span>
+                  </div>
+                  <div class="recommend-list">
+                    <button class="recommend-item">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                      <span>整理本周会议纪要</span>
+                    </button>
+                    <button class="recommend-item">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                      <span>分析销售数据报表</span>
+                    </button>
+                    <button class="recommend-item">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                      <span>搜索知识库文档</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="encourage-card">
+                  <div class="encourage-text">"保持专注，每天进步一点点，积累起来就是巨大的飞跃。"</div>
+                  <div class="encourage-author">— Poly AI</div>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Main -->
+            <main class="app-main">
+              <div class="workspace-view">
+                <div class="workspace-tabs">
+                  <div class="tabs-scroll">
+                    <button class="tab-item active">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><polyline points="9,22 9,12 15,12 15,22"/></svg>
+                      <span>首页</span>
+                    </button>
+                    <button class="tab-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                      <span>项目计划书.docx</span>
+                      <span class="tab-close">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                      </span>
+                    </button>
+                    <button class="tab-item">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                      <span>Q1数据.xlsx</span>
+                      <span class="tab-close">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                      </span>
+                    </button>
+                  </div>
+                  <div class="tabs-actions">
+                    <button class="tab-add-btn">
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="tab-content">
+                  <div class="tab-pane">
+                    <div class="workspace-home">
+                      <div class="home-title">欢迎回来</div>
+                      <div class="home-subtitle">今天想做什么？选择下方工具开始工作</div>
+
+                      <div class="section-title">常用应用</div>
+                      <div class="apps-grid">
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                          </span>
+                          <span class="app-name">文档</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                          </span>
+                          <span class="app-name">PPT</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                          </span>
+                          <span class="app-name">表格</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg>
+                          </span>
+                          <span class="app-name">知识库</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>
+                          </span>
+                          <span class="app-name">待办</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+                          </span>
+                          <span class="app-name">日历</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="23,7 16,12 23,17"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
+                          </span>
+                          <span class="app-name">视频</span>
+                        </button>
+                        <button class="app-item">
+                          <span class="app-icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+                          </span>
+                          <span class="app-name">图片</span>
+                        </button>
+                      </div>
+
+                      <div class="section-title">最近文档</div>
+                      <div class="recent-list">
+                        <div class="recent-item">
+                          <div class="recent-icon" style="color: #3b82f6;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14,2 14,8 20,8"/></svg>
+                          </div>
+                          <div class="recent-info">
+                            <div class="recent-name">2026年产品规划方案.docx</div>
+                            <div class="recent-meta">文档 · 2.4 MB</div>
+                          </div>
+                          <div class="recent-time">2小时前</div>
+                        </div>
+                        <div class="recent-item">
+                          <div class="recent-icon" style="color: #10b981;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+                          </div>
+                          <div class="recent-info">
+                            <div class="recent-name">Q1销售数据统计.xlsx</div>
+                            <div class="recent-meta">表格 · 856 KB</div>
+                          </div>
+                          <div class="recent-time">昨天</div>
+                        </div>
+                        <div class="recent-item">
+                          <div class="recent-icon" style="color: #f59e0b;">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/></svg>
+                          </div>
+                          <div class="recent-info">
+                            <div class="recent-name">团队季度汇报.pptx</div>
+                            <div class="recent-meta">PPT · 12.1 MB</div>
+                          </div>
+                          <div class="recent-time">3天前</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Chat View -->
+    <div id="view-chat" class="view-content">
+      <div class="mockup-frame">
+        <div class="app-container">
+          <!-- Header -->
+          <header class="app-header">
+            <div class="header-left">
+              <button class="mode-toggle-btn">
+                <span class="mode-icon">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="3" y="3" width="7" height="7" rx="1.5"/>
+                    <rect x="14" y="3" width="7" height="7" rx="1.5"/>
+                    <rect x="14" y="14" width="7" height="7" rx="1.5"/>
+                    <rect x="3" y="14" width="7" height="7" rx="1.5"/>
+                  </svg>
+                </span>
+                <span class="mode-label">工作台</span>
+              </button>
+            </div>
+            <div class="header-right">
+              <button class="icon-btn" title="新对话">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+              </button>
+              <button class="icon-btn" title="设置">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-2 2 2 2 0 01-2-2v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83 0 2 2 0 010-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 01-2-2 2 2 0 012-2h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 010-2.83 2 2 0 012.83 0l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 012-2 2 2 0 012 2v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 0 2 2 0 010 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 012 2 2 2 0 01-2 2h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+              </button>
+            </div>
+          </header>
+
+          <!-- Body -->
+          <div class="app-body">
+            <!-- Sidebar -->
+            <aside class="app-sidebar">
+              <button class="toggle-sidebar-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="15 18 9 12 15 6"/>
+                </svg>
+              </button>
+              <div class="sidebar-content">
+                <button class="quick-action-btn" style="background: var(--primary); color: var(--bg-primary); justify-content: center;">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg>
+                  <span>新建对话</span>
+                </button>
+
+                <div class="sidebar-section">
+                  <h4 class="sidebar-section-title">今天</h4>
+                  <div class="quick-actions">
+                    <button class="quick-action-btn">
+                      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">优化前端性能方案讨论</span>
+                    </button>
+                    <button class="quick-action-btn">
+                      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">React 组件设计模式</span>
+                    </button>
+                  </div>
+                </div>
+
+                <div class="sidebar-section">
+                  <h4 class="sidebar-section-title">昨天</h4>
+                  <div class="quick-actions">
+                    <button class="quick-action-btn">
+                      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">数据库索引优化建议</span>
+                    </button>
+                    <button class="quick-action-btn">
+                      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">API 接口设计评审</span>
+                    </button>
+                    <button class="quick-action-btn">
+                      <span style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Docker 部署配置</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </aside>
+
+            <!-- Chat Main -->
+            <main class="app-main" style="background: var(--bg-primary);">
+              <div class="chat-view">
+                <div class="chat-messages">
+                  <div class="message ai">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                      你好！我是 Poly，你的 AI 助手。我可以帮你处理文档、分析数据、编写代码，或者解答任何问题。今天有什么我可以帮你的吗？
+                    </div>
+                  </div>
+                  <div class="message user">
+                    <div class="message-avatar">U</div>
+                    <div class="message-content">
+                      帮我分析一下我们 Q1 的销售数据，看看有哪些趋势和可以优化的地方
+                    </div>
+                  </div>
+                  <div class="message ai">
+                    <div class="message-avatar">AI</div>
+                    <div class="message-content">
+                      我来帮你分析 Q1 销售数据。从数据来看，有几个关键趋势：<br><br>
+                      1. <strong>整体增长</strong>：Q1 销售额同比增长 23%，环比增长 8%<br>
+                      2. <strong>渠道分布</strong>：线上渠道占比提升至 65%，线下 35%<br>
+                      3. <strong>产品表现</strong>：SaaS 产品线增长最快，达到 45%<br><br>
+                      建议优化方向：加强高价值客户维护、优化线下门店布局、增加 SaaS 产品投入。
+                    </div>
+                  </div>
+                </div>
+
+                <div class="chat-input-area">
+                  <div class="chat-input-wrapper">
+                    <textarea class="chat-textarea" rows="1" placeholder="输入消息，按 Enter 发送..."></textarea>
+                    <div class="input-actions">
+                      <button class="input-btn" title="附件">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21.44 11.05l-9.19 9.19a6 6 0 01-8.49-8.49l9.19-9.19a4 4 0 015.66 5.66l-9.2 9.19a2 2 0 01-2.83-2.83l8.49-8.48"/></svg>
+                      </button>
+                      <button class="input-btn send" title="发送">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      </button>
+                    </div>
+                  </div>
+                  <div class="input-hints">
+                    <button class="hint-chip">分析数据</button>
+                    <button class="hint-chip">生成文档</button>
+                    <button class="hint-chip">编写代码</button>
+                    <button class="hint-chip">头脑风暴</button>
+                  </div>
+                </div>
+              </div>
+            </main>
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    function setTheme(theme) {
+      document.documentElement.setAttribute('data-theme', theme);
+      document.querySelectorAll('.theme-btn').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.theme === theme);
+      });
+    }
+
+    function switchView(view) {
+      document.querySelectorAll('.view-content').forEach(el => el.classList.remove('active'));
+      document.querySelectorAll('.view-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('view-' + view).classList.add('active');
+      event.target.classList.add('active');
+    }
+  </script>
+</body>
+</html>

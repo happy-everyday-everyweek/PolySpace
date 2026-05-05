@@ -1,0 +1,64 @@
+[project]
+name = "polyspace-backend"
+version = "0.1.0"
+description = "PolySpace AI Productivity Platform Backend"
+requires-python = ">=3.11"
+dependencies = [
+    "fastapi>=0.115.0",
+    "uvicorn[standard]>=0.30.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "sqlalchemy>=2.0",
+    "alembic>=1.13",
+    "aiosqlite>=0.20",
+    "httpx>=0.27",
+    "litellm>=1.50",
+    "pyyaml>=6.0",
+    "python-multipart>=0.0.9",
+    "websockets>=12.0",
+    "cryptography>=42.0",
+    "pyautogui",
+    "mss",
+    "greenlet>=3.4.0",
+    "PyMuPDF>=1.23.0",
+    "python-docx>=1.2.0",
+    "python-pptx>=1.0.0",
+    "openpyxl>=3.1.0",
+    "beautifulsoup4>=4.12.0",
+]
+
+[project.optional-dependencies]
+vector = [
+    "chromadb>=0.4.0",
+    "sentence-transformers>=2.2.0",
+]
+voice = [
+    "aiortc>=1.9",
+]
+orchestration = [
+    "pyzmq>=25.0",
+]
+all = [
+    "polyspace-backend[vector,voice,orchestration]",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
+[tool.hatch.envs.default]
+path = "D:\\PolySpace\\.venv"
+
+[tool.ruff]
+line-length = 120
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+asyncio_mode = "auto"

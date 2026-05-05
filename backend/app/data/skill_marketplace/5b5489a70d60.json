@@ -1,0 +1,25 @@
+{
+  "id": "5b5489a70d60",
+  "name": "data-analyzer",
+  "description": "数据分析技能，自动生成统计摘要、趋势分析、异常检测",
+  "category": "data",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "bar-chart",
+  "tags": [
+    "data",
+    "analysis",
+    "statistics"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:41.791060",
+  "updated_at": "2026-04-19T15:45:41.791060"
+}

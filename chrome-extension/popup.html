@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolySpace</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { width: 360px; min-height: 480px; background: #1a1a2e; color: #e0e0e0; font-family: -apple-system, sans-serif; }
+    .popup-header { padding: 16px; border-bottom: 1px solid #2a2a4a; display: flex; align-items: center; gap: 10px; }
+    .popup-header h1 { font-size: 16px; font-weight: 600; }
+    .popup-header .logo { width: 24px; height: 24px; background: #6366f1; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 14px; color: #fff; }
+    .popup-actions { padding: 12px 16px; display: flex; flex-direction: column; gap: 8px; }
+    .popup-btn { padding: 10px 14px; border: 1px solid #2a2a4a; border-radius: 8px; background: #16162a; color: #e0e0e0; font-size: 13px; cursor: pointer; text-align: left; transition: background 0.2s; }
+    .popup-btn:hover { background: #2a2a4a; }
+    .popup-btn .btn-icon { margin-right: 8px; }
+    .popup-status { padding: 8px 16px; font-size: 12px; color: #888; }
+    .popup-status.connected { color: #4ade80; }
+    .popup-status.disconnected { color: #f87171; }
+    .popup-settings { padding: 12px 16px; border-top: 1px solid #2a2a4a; }
+    .popup-settings label { display: block; font-size: 12px; color: #888; margin-bottom: 4px; }
+    .popup-settings input { width: 100%; padding: 6px 10px; border: 1px solid #2a2a4a; border-radius: 4px; background: #16162a; color: #e0e0e0; font-size: 12px; outline: none; }
+    .popup-settings input:focus { border-color: #6366f1; }
+    .popup-settings .save-btn { margin-top: 8px; padding: 6px 14px; background: #6366f1; color: #fff; border: none; border-radius: 4px; font-size: 12px; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="popup-header">
+    <div class="logo">P</div>
+    <h1>PolySpace</h1>
+  </div>
+  <div class="popup-status" id="status">检查连接...</div>
+  <div class="popup-actions">
+    <button class="popup-btn" id="btn-summarize"><span class="btn-icon">📝</span>总结当前页面</button>
+    <button class="popup-btn" id="btn-translate"><span class="btn-icon">🌐</span>翻译选中内容</button>
+    <button class="popup-btn" id="btn-explain"><span class="btn-icon">💡</span>解释选中内容</button>
+    <button class="popup-btn" id="btn-capture"><span class="btn-icon">📌</span>保存到知识库</button>
+    <button class="popup-btn" id="btn-chat"><span class="btn-icon">💬</span>打开 AI 对话</button>
+  </div>
+  <div class="popup-settings">
+    <label>服务器地址</label>
+    <input type="text" id="server-url" placeholder="http://localhost:8000" />
+    <label style="margin-top:8px">API Key</label>
+    <input type="password" id="api-key" placeholder="poly_..." />
+    <button class="save-btn" id="save-settings">保存设置</button>
+  </div>
+  <script src="popup.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+name: to-issues
+description: Break a plan, spec, or PRD into independently-grabbable issues on the project issue tracker using tracer-bullet vertical slices. Use when user wants to convert a plan into issues, create implementation tickets, or break down work into issues.
+version: "1.0.0"
+author: matt-pocock
+category: coding
+entry_point: main.py
+parameters:
+  plan_content:
+    type: string
+    description: The plan, spec, or PRD to break into issues
+  issue_tracker:
+    type: string
+    description: The issue tracker type (github, gitlab, jira)
+    default: "github"

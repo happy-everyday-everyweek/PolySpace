@@ -1,0 +1,14 @@
+name: writing-plans
+description: "Use when you have a spec or requirements for a multi-step task, before touching code. Creates bite-sized implementation plans with exact file paths, complete code, and verification steps."
+version: "1.0.0"
+author: obra-superpowers
+category: coding
+entry_point: main.py
+parameters:
+  spec_content:
+    type: string
+    description: The spec or requirements to create an implementation plan from
+  tech_stack:
+    type: string
+    description: Key technologies and libraries to use
+    default: ""

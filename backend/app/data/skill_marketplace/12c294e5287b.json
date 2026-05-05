@@ -1,0 +1,25 @@
+{
+  "id": "12c294e5287b",
+  "name": "email-drafter",
+  "description": "邮件草拟技能，根据上下文生成专业邮件回复",
+  "category": "communication",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "mail",
+  "tags": [
+    "email",
+    "draft",
+    "communication"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:41.904091",
+  "updated_at": "2026-04-19T15:45:41.904091"
+}

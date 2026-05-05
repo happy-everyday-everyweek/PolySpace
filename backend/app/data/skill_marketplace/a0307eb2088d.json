@@ -1,0 +1,25 @@
+{
+  "id": "a0307eb2088d",
+  "name": "code-reviewer",
+  "description": "AI 代码审查技能，自动检测代码问题、安全漏洞、性能瓶颈",
+  "category": "development",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "code",
+  "tags": [
+    "code",
+    "review",
+    "security"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:41.757809",
+  "updated_at": "2026-04-19T15:45:41.757809"
+}

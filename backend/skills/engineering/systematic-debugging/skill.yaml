@@ -1,0 +1,14 @@
+name: systematic-debugging
+description: "Use when encountering any bug, test failure, or unexpected behavior, before proposing fixes. 4-phase root cause process: investigate -> analyze -> hypothesize -> implement."
+version: "1.0.0"
+author: obra-superpowers
+category: coding
+entry_point: main.py
+parameters:
+  bug_description:
+    type: string
+    description: Description of the bug or unexpected behavior
+  error_output:
+    type: string
+    description: Error messages, stack traces, or failure output
+    default: ""

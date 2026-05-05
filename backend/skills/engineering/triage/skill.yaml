@@ -1,0 +1,15 @@
+name: triage
+description: Triage issues through a state machine driven by triage roles. Use when user wants to create an issue, triage issues, review incoming bugs or feature requests, prepare issues for an AFK agent, or manage issue workflow.
+version: "1.0.0"
+author: matt-pocock
+category: coding
+entry_point: main.py
+parameters:
+  action:
+    type: string
+    description: The triage action to perform (show, triage, move, list)
+    default: "show"
+  issue_reference:
+    type: string
+    description: Issue number, URL, or reference to triage
+    default: ""

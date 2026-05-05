@@ -1,0 +1,25 @@
+{
+  "id": "75b9669f0981",
+  "name": "meeting-summarizer",
+  "description": "会议纪要生成技能，从会议记录中提取要点、行动项、决策",
+  "category": "productivity",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "users",
+  "tags": [
+    "meeting",
+    "summary",
+    "notes"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:41.824231",
+  "updated_at": "2026-04-19T15:45:41.824742"
+}

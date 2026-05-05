@@ -1,0 +1,170 @@
+# Third-party sub-projects (not part of PolySpace core)
+DocumentServer-*/
+MaiBot-*/
+VibeVoice-*/
+VibeVoice-main/
+browser-use-*/
+cutia-main/
+deer-flow-main/
+deer-flow-main/
+hyperframes-*/
+onyx-*/
+openclaw-*/
+seomachine/
+seomachine-main/
+skills-main/
+skills-main*/
+twenty-*/
+GenericAgent-*/
+evolver-*/
+claude-mem-*/
+DeepTutor-*/
+hermes-agent-*/
+hermes-agent-*/
+fff.nvim-*/
+opendataloader-pdf-*/
+opendataloader-pdf-temp/
+openscreen-*/
+superpowers-*/
+project-nomad-*/
+dexter-*/
+Operit-*/
+markitdown-*/
+litellm-*/
+openakita-*/
+system_prompts_leaks/
+system_prompts_leaks-main/
+
+# Large binary files
+*.tar.gz
+*.zip
+*.msi
+*.exe
+*.dll
+*.so
+*.dylib
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
+*.whl
+.venv/
+venv/
+env/
+.mypy_cache/
+.ruff_cache/
+.pytest_cache/
+.ipynb_checkpoints
+
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error-log*
+.npm
+.yarn
+package-lock.json
+
+# Android
+*.keystore
+*.jks
+keystore.properties
+local.properties
+.gradle/
+build/
+*.apk
+*.aab
+.cxx/
+
+# Desktop (Electron)
+desktop/dist/
+desktop/node_modules/
+
+# Frontend
+frontend/dist/
+frontend/node_modules/
+
+# LibreOffice installer
+libreoffice/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# Environment and secrets
+.env
+.env.*
+!.env.example
+secrets.env
+*.key
+*.pem
+*.p12
+.email_key
+
+# Database files
+*.db
+*.sqlite
+*.sqlite3
+polyspace_audit.db
+
+# Data files
+backend/data/
+!backend/data/.gitkeep
+
+# Logs
+*.log
+logs/
+
+# Cache
+.cache/
+*.cache
+.temp/
+tmp/
+temp/
+
+# Build output
+build_output.txt
+
+# OS
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Desktop.ini
+
+# Trae IDE
+.trae/
+
+# Learnings
+.learnings/
+
+# Claude IDE
+.claude/
+
+# Test results
+test-*.txt
+test-*.js
+test-result.txt
+test-out.txt
+test-simple.js
+test-store.js
+test-app*.js
+test-electron*.js
+
+# Misc
+ruff_report.json
+uv.lock
+tsconfig.tsbuildinfo

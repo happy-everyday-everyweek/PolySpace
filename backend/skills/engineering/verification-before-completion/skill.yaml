@@ -1,0 +1,14 @@
+name: verification-before-completion
+description: "Use when about to claim work is complete, fixed, or passing. Requires running verification commands and confirming output before making any success claims. Evidence before assertions, always."
+version: "1.0.0"
+author: obra-superpowers
+category: coding
+entry_point: main.py
+parameters:
+  claim:
+    type: string
+    description: What you are claiming is complete or working
+  verification_command:
+    type: string
+    description: The command that proves this claim
+    default: ""

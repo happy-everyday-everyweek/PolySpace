@@ -1,0 +1,14 @@
+name: subagent-driven-development
+description: "Use when executing implementation plans with independent tasks. Dispatches fresh subagent per task with two-stage review: spec compliance first, then code quality."
+version: "1.0.0"
+author: obra-superpowers
+category: coding
+entry_point: main.py
+parameters:
+  plan_path:
+    type: string
+    description: Path to the implementation plan to execute
+  execution_mode:
+    type: string
+    description: "Execution mode: subagent (recommended) or inline"
+    default: "subagent"

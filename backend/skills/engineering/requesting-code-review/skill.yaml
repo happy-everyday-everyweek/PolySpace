@@ -1,0 +1,14 @@
+name: requesting-code-review
+description: "Use when a major project step has been completed and needs review against the original plan and coding standards. Reviews spec compliance then code quality."
+version: "1.0.0"
+author: obra-superpowers
+category: coding
+entry_point: main.py
+parameters:
+  completed_step:
+    type: string
+    description: Description of the completed step or feature
+  plan_reference:
+    type: string
+    description: Reference to the original plan or spec
+    default: ""

@@ -1,0 +1,25 @@
+{
+  "id": "7cd8478f859d",
+  "name": "learning-tutor",
+  "description": "个性化学习辅导技能，苏格拉底式提问、知识图谱构建",
+  "category": "education",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "graduation-cap",
+  "tags": [
+    "learning",
+    "tutor",
+    "education"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:41.932247",
+  "updated_at": "2026-04-19T15:45:41.932247"
+}

@@ -1,0 +1,31 @@
+from app.models.tables import (
+    Base,
+    CalendarEvent,
+    ChatMessage,
+    ChatSession,
+    EmailRecord,
+    KanbanCard,
+    KnowledgeEntry,
+    LLMModelConfig,
+    MemoItem,
+    Recording,
+    SettingsRecord,
+    TodoItem,
+    WorkspaceDocument,
+)
+
+__all__ = [
+    "Base",
+    "CalendarEvent",
+    "ChatMessage",
+    "ChatSession",
+    "EmailRecord",
+    "KanbanCard",
+    "KnowledgeEntry",
+    "LLMModelConfig",
+    "MemoItem",
+    "Recording",
+    "SettingsRecord",
+    "TodoItem",
+    "WorkspaceDocument",
+]

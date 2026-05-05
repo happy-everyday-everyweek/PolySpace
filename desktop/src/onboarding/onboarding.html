@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PolySpace - Setup</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary: #4f46e5;
+      --primary-hover: #4338ca;
+      --primary-light: rgba(79, 70, 229, 0.1);
+      --bg-primary: #ffffff;
+      --bg-secondary: #f9fafb;
+      --bg-tertiary: #f0f0f0;
+      --text-primary: #111827;
+      --text-secondary: #6b7280;
+      --text-tertiary: #9ca3af;
+      --border-color: #e5e7eb;
+      --shadow: 0 1px 3px rgba(0,0,0,0.1);
+      --shadow-md: 0 4px 12px rgba(0,0,0,0.1);
+      --radius-md: 6px;
+      --radius-lg: 8px;
+      --radius-xl: 12px;
+      --transition-normal: 0.2s ease;
+      --transition-smooth: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      --green: #2e8b57;
+      --green-light: rgba(46, 139, 87, 0.08);
+      --red: #d64537;
+      --red-light: rgba(214, 69, 55, 0.08);
+      --blue: #2962ff;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      user-select: none;
+    }
+
+    .container { display: flex; flex-direction: column; height: 100vh; }
+
+    .header {
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px 32px 0; -webkit-app-region: drag;
+    }
+    .logo-area { display: flex; align-items: center; gap: 10px; }
+    .logo-icon { width: 28px; height: 28px; }
+    .logo-text { font-size: 16px; font-weight: 700; color: var(--text-primary); }
+
+    .content {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: center; padding: 0 40px; overflow-y: auto;
+      -webkit-app-region: no-drag;
+    }
+
+    .step-container { width: 100%; max-width: 540px; display: none; }
+    .step-container.active { display: block; animation: fadeSlideIn 0.35s ease; }
+
+    .step-title {
+      font-size: 22px; font-weight: 700; text-align: center;
+      margin-bottom: 6px; color: var(--text-primary);
+    }
+    .step-subtitle {
+      font-size: 13px; text-align: center; color: var(--text-secondary);
+      margin-bottom: 24px; line-height: 1.6;
+    }
+    .icon-center { display: flex; justify-content: center; margin-bottom: 20px; }
+    .icon-center svg { width: 72px; height: 72px; }
+    .icon-center.large svg { width: 88px; height: 88px; }
+
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateX(20px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-6px); }
+    }
+    .welcome-icon-animated svg { animation: float 3s ease-in-out infinite; }
+
+    .feature-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 20px; }
+    .feature-card {
+      border: 1px solid var(--border-color); border-radius: var(--radius-xl);
+      padding: 14px; display: flex; align-items: center; gap: 10px;
+      background: var(--bg-primary); transition: all var(--transition-normal);
+    }
+    .feature-card:hover { border-color: var(--primary); box-shadow: var(--shadow-md); }
+    .feature-card-icon {
+      width: 36px; height: 36px; border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; background: var(--primary-light);
+    }
+    .feature-card-icon svg { width: 20px; height: 20px; }
+    .feature-card-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .feature-card-desc { font-size: 11px; color: var(--text-tertiary); margin-top: 2px; }
+
+    .perm-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .perm-card {
+      border: 1px solid var(--border-color); border-radius: var(--radius-xl);
+      padding: 14px 16px; display: flex; align-items: center; gap: 12px;
+      background: var(--bg-primary); cursor: pointer; transition: all var(--transition-normal);
+    }
+    .perm-card:hover { border-color: var(--primary); }
+    .perm-card.granted { border-color: var(--green); background: var(--green-light); }
+    .perm-card-icon {
+      width: 36px; height: 36px; border-radius: var(--radius-lg);
+      display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .perm-card-icon svg { width: 20px; height: 20px; }
+    .perm-card-icon.ppt { background: rgba(214, 69, 55, 0.1); }
+    .perm-card-icon.excel { background: rgba(46, 139, 87, 0.1); }
+    .perm-card-icon.word { background: rgba(41, 98, 255, 0.1); }
+    .perm-card-icon.pdf { background: rgba(214, 69, 55, 0.1); }
+    .perm-card-info { flex: 1; min-width: 0; }
+    .perm-card-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .perm-card-desc { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+    .perm-toggle {
+      width: 40px; height: 22px; border-radius: 11px; background: var(--border-color);
+      position: relative; cursor: pointer; transition: background var(--transition-normal); flex-shrink: 0;
+    }
+    .perm-toggle.on { background: var(--primary); }
+    .perm-toggle::after {
+      content: ''; position: absolute; width: 18px; height: 18px; border-radius: 50%;
+      background: white; top: 2px; left: 2px; transition: transform var(--transition-normal);
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    .perm-toggle.on::after { transform: translateX(18px); }
+
+    .select-all-row {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 8px 14px; background: var(--bg-secondary); border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+    }
+    .select-all-label { font-size: 12px; font-weight: 500; color: var(--text-secondary); }
+    .select-all-btn {
+      font-size: 12px; font-weight: 500; color: var(--primary); cursor: pointer;
+      background: none; border: none; padding: 3px 8px; border-radius: var(--radius-md);
+      transition: background var(--transition-normal);
+    }
+    .select-all-btn:hover { background: var(--primary-light); }
+    .hint-text { font-size: 11px; color: var(--text-tertiary); text-align: center; line-height: 1.5; }
+
+    .tier-section { margin-bottom: 12px; }
+    .tier-label {
+      font-size: 13px; font-weight: 600; color: var(--text-primary); margin-bottom: 4px;
+      display: flex; align-items: center; gap: 6px;
+    }
+    .tier-required { font-size: 10px; color: var(--red); font-weight: 500; }
+    .tier-hint { font-size: 11px; color: var(--text-tertiary); margin-bottom: 8px; }
+    .tier-row {
+      display: flex; gap: 8px; align-items: flex-start; margin-bottom: 8px;
+    }
+    .tier-select {
+      flex: 0 0 130px; padding: 7px 10px; border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg); font-size: 12px; color: var(--text-primary);
+      background: var(--bg-primary); outline: none; cursor: pointer;
+      transition: border-color var(--transition-normal);
+    }
+    .tier-select:focus { border-color: var(--primary); }
+    .tier-input {
+      flex: 1; padding: 7px 10px; border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg); font-size: 12px; color: var(--text-primary);
+      background: var(--bg-primary); outline: none;
+      transition: border-color var(--transition-normal);
+    }
+    .tier-input:focus { border-color: var(--primary); }
+    .tier-input::placeholder { color: var(--text-tertiary); }
+    .tier-key-row {
+      display: flex; gap: 8px; align-items: center; margin-bottom: 8px;
+    }
+    .tier-key-input {
+      flex: 1; padding: 7px 10px; border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg); font-size: 12px; color: var(--text-primary);
+      background: var(--bg-primary); outline: none;
+      transition: border-color var(--transition-normal);
+    }
+    .tier-key-input:focus { border-color: var(--primary); }
+    .tier-key-input::placeholder { color: var(--text-tertiary); }
+    .tier-key-link {
+      font-size: 11px; color: var(--primary); cursor: pointer; text-decoration: none;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .tier-key-link:hover { text-decoration: underline; }
+    .tier-divider {
+      border: none; border-top: 1px solid var(--border-color); margin: 12px 0;
+    }
+
+    .settings-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .setting-item {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 14px; border: 1px solid var(--border-color);
+      border-radius: var(--radius-xl); background: var(--bg-primary);
+    }
+    .setting-item-info { flex: 1; min-width: 0; }
+    .setting-item-name { font-size: 13px; font-weight: 600; color: var(--text-primary); }
+    .setting-item-desc { font-size: 11px; color: var(--text-tertiary); margin-top: 1px; }
+    .setting-select {
+      padding: 5px 8px; border: 1px solid var(--border-color); border-radius: var(--radius-md);
+      font-size: 12px; color: var(--text-primary); background: var(--bg-primary);
+      outline: none; cursor: pointer;
+    }
+    .setting-select:focus { border-color: var(--primary); }
+
+    .progress-container { text-align: center; padding: 20px 0; }
+    .progress-bar-bg {
+      width: 100%; height: 6px; background: var(--bg-tertiary);
+      border-radius: 3px; overflow: hidden; margin-bottom: 16px;
+    }
+    .progress-bar-fill {
+      height: 100%; background: var(--primary); border-radius: 3px;
+      transition: width 0.3s ease; width: 0%;
+    }
+    .progress-text { font-size: 13px; color: var(--text-secondary); margin-bottom: 4px; }
+    .progress-detail { font-size: 11px; color: var(--text-tertiary); }
+    .progress-check { display: none; margin-bottom: 16px; }
+    .progress-check svg { width: 56px; height: 56px; }
+
+    .footer {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 12px 32px 20px; -webkit-app-region: no-drag;
+    }
+    .step-indicators { display: flex; gap: 6px; }
+    .step-dot {
+      width: 6px; height: 6px; border-radius: 50%; background: var(--border-color);
+      transition: all var(--transition-normal);
+    }
+    .step-dot.active { background: var(--primary); width: 20px; border-radius: 3px; }
+    .step-dot.completed { background: var(--primary); }
+
+    .footer-actions { display: flex; gap: 8px; }
+    .btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+      padding: 7px 18px; border-radius: var(--radius-md); font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all var(--transition-normal); border: none; outline: none;
+    }
+    .btn-secondary {
+      background: var(--bg-secondary); color: var(--text-secondary);
+      border: 1px solid var(--border-color);
+    }
+    .btn-secondary:hover { background: var(--bg-tertiary); }
+    .btn-primary { background: var(--primary); color: #ffffff; }
+    .btn-primary:hover { background: var(--primary-hover); }
+    .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .message-box {
+      padding: 10px 14px; border-radius: var(--radius-lg); margin-bottom: 12px;
+      font-size: 12px; display: none;
+    }
+    .message-box.success { background: var(--green-light); color: var(--green); }
+    .message-box.error { background: var(--red-light); color: var(--red); }
+
+    .scrollable {
+      max-height: calc(100vh - 200px); overflow-y: auto; padding-right: 4px;
+    }
+    .scrollable::-webkit-scrollbar { width: 4px; }
+    .scrollable::-webkit-scrollbar-track { background: transparent; }
+    .scrollable::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 2px; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <div class="logo-area">
+        <svg class="logo-icon" viewBox="0 0 32 32" fill="none">
+          <circle cx="16" cy="16" r="13" stroke="#111827" stroke-width="2.5" fill="none"/>
+        </svg>
+        <span class="logo-text">PolySpace</span>
+      </div>
+    </div>
+
+    <div class="content">
+      <div id="step-0" class="step-container active">
+        <div class="icon-center large welcome-icon-animated">
+          <svg viewBox="0 0 88 88" fill="none">
+            <rect width="88" height="88" rx="22" fill="rgba(79,70,229,0.08)"/>
+            <circle cx="44" cy="44" r="28" stroke="#4f46e5" stroke-width="2" fill="none" opacity="0.2"/>
+            <circle cx="44" cy="44" r="18" stroke="#4f46e5" stroke-width="1.5" fill="rgba(79,70,229,0.05)"/>
+            <path d="M38 36l14 8-14 8V36z" fill="#4f46e5"/>
+          </svg>
+        </div>
+        <div class="step-title">Welcome to PolySpace</div>
+        <div class="step-subtitle">Your all-in-one AI-powered workspace.<br>Let's get you set up in just a few steps.</div>
+      </div>
+
+      <div id="step-1" class="step-container">
+        <div class="step-title">What PolySpace Can Do</div>
+        <div class="step-subtitle">A powerful workspace with AI at its core.</div>
+        <div class="feature-grid">
+          <div class="feature-card"><div class="feature-card-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm1 11H9v-2h2v2zm0-4H9V5h2v4z" fill="#4f46e5"/></svg></div><div><div class="feature-card-name">AI Assistant</div><div class="feature-card-desc">Smart conversations & tasks</div></div></div>
+          <div class="feature-card"><div class="feature-card-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M4 4h12v12H4V4zm1 1v10h10V5H5zm2 2h6v1H7V7zm0 3h6v1H7v-1zm0 3h4v1H7v-1z" fill="#4f46e5"/></svg></div><div><div class="feature-card-name">Knowledge Base</div><div class="feature-card-desc">Organize your knowledge</div></div></div>
+          <div class="feature-card"><div class="feature-card-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M3 5h14v1H3V5zm0 4h14v1H3V9zm0 4h10v1H3v-1z" fill="#4f46e5"/></svg></div><div><div class="feature-card-name">Document Editor</div><div class="feature-card-desc">Word, Excel, PPT & PDF</div></div></div>
+          <div class="feature-card"><div class="feature-card-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2a8 8 0 100 16 8 8 0 000-16zm-1 4h2v5h-2V6zm0 7h2v2h-2v-2z" fill="#4f46e5"/></svg></div><div><div class="feature-card-name">Smart Schedule</div><div class="feature-card-desc">Calendar & task planning</div></div></div>
+          <div class="feature-card"><div class="feature-card-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M3 3h14v14H3V3zm1 1v12h12V4H4zm3 3h6v1H7V7zm0 3h6v1H7v-1z" fill="#4f46e5"/></svg></div><div><div class="feature-card-name">Automation</div><div class="feature-card-desc">Screen & workflow automation</div></div></div>
+          <div class="feature-card"><div class="feature-card-icon"><svg viewBox="0 0 20 20" fill="none"><path d="M10 2l2.5 5 5.5.8-4 3.9.9 5.3L10 14.5 5.1 17l.9-5.3-4-3.9 5.5-.8L10 2z" fill="#4f46e5"/></svg></div><div><div class="feature-card-name">Multi-Device Sync</div><div class="feature-card-desc">Seamless cross-platform</div></div></div>
+        </div>
+      </div>
+
+      <div id="step-2" class="step-container">
+        <div class="step-title">Set as Default App</div>
+        <div class="step-subtitle">Choose which file types to open with PolySpace by default.</div>
+        <div class="perm-list">
+          <div class="perm-card" data-type="ppt" onclick="togglePerm(this)">
+            <div class="perm-card-icon ppt"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#d64537" stroke-width="1.5" fill="rgba(214,69,55,0.05)"/><text x="10" y="13" text-anchor="middle" font-size="6" font-weight="700" fill="#d64537">PPT</text></svg></div>
+            <div class="perm-card-info"><div class="perm-card-name">PowerPoint</div><div class="perm-card-desc">.ppt .pptx</div></div>
+            <div class="perm-toggle" id="toggle-ppt"></div>
+          </div>
+          <div class="perm-card" data-type="excel" onclick="togglePerm(this)">
+            <div class="perm-card-icon excel"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#2e8b57" stroke-width="1.5" fill="rgba(46,139,87,0.05)"/><text x="10" y="13" text-anchor="middle" font-size="6" font-weight="700" fill="#2e8b57">XLS</text></svg></div>
+            <div class="perm-card-info"><div class="perm-card-name">Excel</div><div class="perm-card-desc">.xls .xlsx</div></div>
+            <div class="perm-toggle" id="toggle-excel"></div>
+          </div>
+          <div class="perm-card" data-type="word" onclick="togglePerm(this)">
+            <div class="perm-card-icon word"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#2962ff" stroke-width="1.5" fill="rgba(41,98,255,0.05)"/><text x="10" y="13" text-anchor="middle" font-size="6" font-weight="700" fill="#2962ff">DOC</text></svg></div>
+            <div class="perm-card-info"><div class="perm-card-name">Word</div><div class="perm-card-desc">.doc .docx</div></div>
+            <div class="perm-toggle" id="toggle-word"></div>
+          </div>
+          <div class="perm-card" data-type="pdf" onclick="togglePerm(this)">
+            <div class="perm-card-icon pdf"><svg viewBox="0 0 20 20" fill="none"><rect x="3" y="2" width="14" height="16" rx="2" stroke="#d64537" stroke-width="1.5" fill="rgba(214,69,55,0.05)"/><text x="10" y="13" text-anchor="middle" font-size="6" font-weight="700" fill="#d64537">PDF</text></svg></div>
+            <div class="perm-card-info"><div class="perm-card-name">PDF</div><div class="perm-card-desc">.pdf</div></div>
+            <div class="perm-toggle" id="toggle-pdf"></div>
+          </div>
+        </div>
+        <div class="select-all-row">
+          <span class="select-all-label">Select all file types</span>
+          <button class="select-all-btn" id="selectAllBtn" onclick="toggleSelectAll()">Select All</button>
+        </div>
+        <div id="permMessage" class="message-box success"></div>
+        <div class="hint-text">You can change this later in Settings.</div>
+      </div>
+
+      <div id="step-3" class="step-container">
+        <div class="step-title">Configure AI Models</div>
+        <div class="step-subtitle">Set up model tiers for the LLM dispatch system. Base model is required.</div>
+        <div class="scrollable">
+          <div class="tier-section">
+            <div class="tier-label">Base Model <span class="tier-required">Required</span></div>
+            <div class="tier-hint">Default model used when no tier-specific model is configured</div>
+            <div class="tier-row">
+              <select class="tier-select" id="base-provider" onchange="onProviderChange('base')">
+                <option value="">Select provider</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="zhipu">Zhipu AI</option>
+                <option value="moonshot">Moonshot</option>
+                <option value="qwen">Qwen</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input class="tier-input" id="base-model-id" placeholder="e.g. deepseek-chat, gpt-4o">
+            </div>
+            <div class="tier-key-row">
+              <input class="tier-key-input" id="base-api-key" type="password" placeholder="API Key">
+              <a class="tier-key-link" id="base-key-link" onclick="openKeyLink('base')">Get API Key</a>
+            </div>
+            <div class="tier-row">
+              <input class="tier-input" id="base-api-base" placeholder="API Base URL (leave empty for default)">
+            </div>
+          </div>
+
+          <hr class="tier-divider">
+
+          <div class="tier-section">
+            <div class="tier-label">Strong Model</div>
+            <div class="tier-hint">For complex planning tasks. Suggested: GPT-5.4, GLM-5.1</div>
+            <div class="tier-row">
+              <select class="tier-select" id="strong-provider" onchange="onProviderChange('strong')">
+                <option value="">Select provider</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="zhipu">Zhipu AI</option>
+                <option value="moonshot">Moonshot</option>
+                <option value="qwen">Qwen</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input class="tier-input" id="strong-model-id" placeholder="e.g. gpt-4o, glm-4">
+            </div>
+            <div class="tier-key-row">
+              <input class="tier-key-input" id="strong-api-key" type="password" placeholder="API Key">
+              <a class="tier-key-link" id="strong-key-link" onclick="openKeyLink('strong')">Get API Key</a>
+            </div>
+          </div>
+
+          <hr class="tier-divider">
+
+          <div class="tier-section">
+            <div class="tier-label">Performance Model</div>
+            <div class="tier-hint">For daily tasks. Suggested: qwen3.5-35b-a3b</div>
+            <div class="tier-row">
+              <select class="tier-select" id="performance-provider" onchange="onProviderChange('performance')">
+                <option value="">Select provider</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="zhipu">Zhipu AI</option>
+                <option value="moonshot">Moonshot</option>
+                <option value="qwen">Qwen</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input class="tier-input" id="performance-model-id" placeholder="e.g. qwen-max, deepseek-chat">
+            </div>
+            <div class="tier-key-row">
+              <input class="tier-key-input" id="performance-api-key" type="password" placeholder="API Key">
+              <a class="tier-key-link" id="performance-key-link" onclick="openKeyLink('performance')">Get API Key</a>
+            </div>
+          </div>
+
+          <hr class="tier-divider">
+
+          <div class="tier-section">
+            <div class="tier-label">Cost-Effective Model</div>
+            <div class="tier-hint">For intent detection, memory consolidation. Suggested: lightweight models</div>
+            <div class="tier-row">
+              <select class="tier-select" id="cost_effective-provider" onchange="onProviderChange('cost_effective')">
+                <option value="">Select provider</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="zhipu">Zhipu AI</option>
+                <option value="moonshot">Moonshot</option>
+                <option value="qwen">Qwen</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input class="tier-input" id="cost_effective-model-id" placeholder="e.g. gpt-4o-mini, deepseek-chat">
+            </div>
+            <div class="tier-key-row">
+              <input class="tier-key-input" id="cost_effective-api-key" type="password" placeholder="API Key">
+              <a class="tier-key-link" id="cost_effective-key-link" onclick="openKeyLink('cost_effective')">Get API Key</a>
+            </div>
+          </div>
+
+          <hr class="tier-divider">
+
+          <div class="tier-section">
+            <div class="tier-label">Multimodal Model</div>
+            <div class="tier-hint">For image, video, audio processing</div>
+            <div class="tier-row">
+              <select class="tier-select" id="vertical_multimodal-provider" onchange="onProviderChange('vertical_multimodal')">
+                <option value="">Select provider</option>
+                <option value="openai">OpenAI</option>
+                <option value="anthropic">Anthropic</option>
+                <option value="deepseek">DeepSeek</option>
+                <option value="zhipu">Zhipu AI</option>
+                <option value="moonshot">Moonshot</option>
+                <option value="qwen">Qwen</option>
+                <option value="custom">Custom</option>
+              </select>
+              <input class="tier-input" id="vertical_multimodal-model-id" placeholder="e.g. gpt-4o, glm-4v">
+            </div>
+            <div class="tier-key-row">
+              <input class="tier-key-input" id="vertical_multimodal-api-key" type="password" placeholder="API Key">
+              <a class="tier-key-link" id="vertical_multimodal-key-link" onclick="openKeyLink('vertical_multimodal')">Get API Key</a>
+            </div>
+          </div>
+        </div>
+        <div id="modelMessage" class="message-box error"></div>
+      </div>
+
+      <div id="step-4" class="step-container">
+        <div class="step-title">Basic Settings</div>
+        <div class="step-subtitle">A few important preferences to get you started.</div>
+        <div class="settings-list">
+          <div class="setting-item">
+            <div class="setting-item-info"><div class="setting-item-name">Theme</div><div class="setting-item-desc">Choose your preferred appearance</div></div>
+            <select class="setting-select" id="setting-theme"><option value="auto">System</option><option value="light">Light</option><option value="dark">Dark</option></select>
+          </div>
+          <div class="setting-item">
+            <div class="setting-item-info"><div class="setting-item-name">Language</div><div class="setting-item-desc">Interface language</div></div>
+            <select class="setting-select" id="setting-language"><option value="zh-CN">Chinese</option><option value="en">English</option></select>
+          </div>
+          <div class="setting-item">
+            <div class="setting-item-info"><div class="setting-item-name">Auto Start</div><div class="setting-item-desc">Launch PolySpace on system startup</div></div>
+            <div class="perm-toggle" id="toggle-autostart" onclick="toggleSetting('autostart')"></div>
+          </div>
+          <div class="setting-item">
+            <div class="setting-item-info"><div class="setting-item-name">Minimize to Tray</div><div class="setting-item-desc">Keep running in background when closed</div></div>
+            <div class="perm-toggle on" id="toggle-tray" onclick="toggleSetting('tray')"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="step-5" class="step-container">
+        <div class="step-title">Setting Up</div>
+        <div class="step-subtitle">PolySpace is configuring everything for you...</div>
+        <div class="progress-container">
+          <div class="progress-check" id="progressCheck">
+            <svg viewBox="0 0 56 56" fill="none"><circle cx="28" cy="28" r="24" fill="rgba(46,139,87,0.1)"/><circle cx="28" cy="28" r="24" stroke="#2e8b57" stroke-width="2" fill="none" opacity="0.3"/><path d="M18 28l7 7 13-13" stroke="#2e8b57" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </div>
+          <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBar"></div></div>
+          <div class="progress-text" id="progressText">Initializing...</div>
+          <div class="progress-detail" id="progressDetail"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer">
+      <div class="step-indicators" id="stepIndicators"></div>
+      <div class="footer-actions">
+        <button class="btn btn-secondary" id="btnBack" onclick="goBack()" style="display:none">Back</button>
+        <button class="btn btn-secondary" id="btnSkip" onclick="skipStep()" style="display:none">Skip</button>
+        <button class="btn btn-primary" id="btnNext" onclick="nextStep()">Next</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_STEPS = 6;
+    let currentStep = 0;
+    const permToggles = { ppt: false, excel: false, word: false, pdf: false };
+    const settingToggles = { autostart: false, tray: true };
+
+    const PROVIDER_KEY_URLS = {
+      openai: 'https://platform.openai.com/api-keys',
+      anthropic: 'https://console.anthropic.com/',
+      deepseek: 'https://platform.deepseek.com/api_keys',
+      zhipu: 'https://open.bigmodel.cn/',
+      moonshot: 'https://platform.moonshot.cn/',
+      qwen: 'https://dashscope.console.aliyun.com/',
+    };
+
+    const TIERS = ['base', 'strong', 'performance', 'cost_effective', 'vertical_multimodal'];
+
+    function init() {
+      renderStepIndicators();
+      updateUI();
+    }
+
+    function renderStepIndicators() {
+      const c = document.getElementById('stepIndicators');
+      c.innerHTML = '';
+      for (let i = 0; i < TOTAL_STEPS; i++) {
+        const d = document.createElement('div');
+        d.className = 'step-dot';
+        d.id = `dot-${i}`;
+        c.appendChild(d);
+      }
+    }
+
+    function onProviderChange(tier) {
+      const sel = document.getElementById(`${tier}-provider`);
+      const link = document.getElementById(`${tier}-key-link`);
+      const provider = sel.value;
+      if (provider && PROVIDER_KEY_URLS[provider]) {
+        link.style.display = 'inline';
+        link.textContent = `Get ${provider.charAt(0).toUpperCase() + provider.slice(1)} Key`;
+      } else {
+        link.style.display = 'none';
+      }
+    }
+
+    function openKeyLink(tier) {
+      const sel = document.getElementById(`${tier}-provider`);
+      const provider = sel.value;
+      if (provider && PROVIDER_KEY_URLS[provider]) {
+        window.onboarding.openExternal(PROVIDER_KEY_URLS[provider]);
+      }
+    }
+
+    function togglePerm(card) {
+      const type = card.dataset.type;
+      permToggles[type] = !permToggles[type];
+      document.getElementById(`toggle-${type}`).classList.toggle('on', permToggles[type]);
+      card.classList.toggle('granted', permToggles[type]);
+      updateSelectAllBtn();
+    }
+
+    function toggleSelectAll() {
+      const allOn = Object.values(permToggles).every(v => v);
+      Object.keys(permToggles).forEach(type => {
+        permToggles[type] = !allOn;
+        document.getElementById(`toggle-${type}`).classList.toggle('on', permToggles[type]);
+        document.querySelector(`.perm-card[data-type="${type}"]`).classList.toggle('granted', permToggles[type]);
+      });
+      updateSelectAllBtn();
+    }
+
+    function updateSelectAllBtn() {
+      document.getElementById('selectAllBtn').textContent = Object.values(permToggles).every(v => v) ? 'Deselect All' : 'Select All';
+    }
+
+    function toggleSetting(key) {
+      settingToggles[key] = !settingToggles[key];
+      document.getElementById(`toggle-${key}`).classList.toggle('on', settingToggles[key]);
+    }
+
+    function updateUI() {
+      for (let i = 0; i < TOTAL_STEPS; i++) {
+        document.getElementById(`step-${i}`).classList.toggle('active', i === currentStep);
+        const dot = document.getElementById(`dot-${i}`);
+        dot.className = 'step-dot';
+        if (i < currentStep) dot.classList.add('completed');
+        if (i === currentStep) dot.classList.add('active');
+      }
+
+      const btnNext = document.getElementById('btnNext');
+      const btnBack = document.getElementById('btnBack');
+      const btnSkip = document.getElementById('btnSkip');
+
+      btnBack.style.display = currentStep > 0 && currentStep < TOTAL_STEPS - 1 ? 'inline-flex' : 'none';
+      btnSkip.style.display = (currentStep >= 1 && currentStep <= 4) ? 'inline-flex' : 'none';
+
+      if (currentStep === 0) btnNext.textContent = 'Get Started';
+      else if (currentStep === 2) btnNext.textContent = 'Apply & Continue';
+      else if (currentStep === 3) btnNext.textContent = 'Save & Continue';
+      else if (currentStep === TOTAL_STEPS - 2) btnNext.textContent = 'Start Setup';
+      else if (currentStep === TOTAL_STEPS - 1) btnNext.style.display = 'none';
+      else btnNext.textContent = 'Next';
+
+      if (currentStep < TOTAL_STEPS - 1) btnNext.style.display = 'inline-flex';
+    }
+
+    function getTierConfig(tier) {
+      const provider = document.getElementById(`${tier}-provider`)?.value || '';
+      const modelId = document.getElementById(`${tier}-model-id`)?.value || '';
+      const apiKey = document.getElementById(`${tier}-api-key`)?.value || '';
+      const apiBase = document.getElementById(`${tier}-api-base`)?.value || '';
+      return { provider, modelId, apiKey, apiBase };
+    }
+
+    async function nextStep() {
+      if (currentStep === 2) await applyFileAssociations();
+      if (currentStep === 3) {
+        if (!validateModelConfig()) return;
+        await saveModelConfig();
+      }
+      if (currentStep === 4) await saveSettings();
+      if (currentStep === TOTAL_STEPS - 2) {
+        currentStep++;
+        updateUI();
+        await runAutoConfig();
+        return;
+      }
+      if (currentStep < TOTAL_STEPS - 1) { currentStep++; updateUI(); }
+    }
+
+    function goBack() { if (currentStep > 0) { currentStep--; updateUI(); } }
+    function skipStep() { if (currentStep < TOTAL_STEPS - 1) { currentStep++; updateUI(); } }
+
+    function validateModelConfig() {
+      const base = getTierConfig('base');
+      if (!base.provider || !base.modelId) {
+        const msgEl = document.getElementById('modelMessage');
+        msgEl.textContent = 'Base model is required. Please select a provider and enter a model ID.';
+        msgEl.style.display = 'block';
+        return false;
+      }
+      document.getElementById('modelMessage').style.display = 'none';
+      return true;
+    }
+
+    async function applyFileAssociations() {
+      const selectedTypes = Object.keys(permToggles).filter(k => permToggles[k]);
+      if (selectedTypes.length === 0) return;
+      try {
+        const result = await window.onboarding.registerFileAssociations(selectedTypes);
+        const msgEl = document.getElementById('permMessage');
+        if (result.success) {
+          msgEl.className = 'message-box success';
+          msgEl.textContent = `Set PolySpace as default for ${selectedTypes.length} file type(s).`;
+          msgEl.style.display = 'block';
+          await window.onboarding.setConfig('fileAssociations.registered', selectedTypes);
+        } else {
+          msgEl.className = 'message-box error';
+          msgEl.textContent = 'Could not set all associations. You can configure this later.';
+          msgEl.style.display = 'block';
+        }
+      } catch (err) { /* ignore */ }
+    }
+
+    async function saveModelConfig() {
+      const configs = {};
+      TIERS.forEach(tier => {
+        const c = getTierConfig(tier);
+        if (c.provider && c.modelId) {
+          configs[tier] = c;
+        }
+      });
+      await window.onboarding.setConfig('onboarding.models', configs);
+
+      if (configs.base) {
+        const base = configs.base;
+        const modelStr = base.apiBase
+          ? `${base.provider}/${base.modelId}|${base.apiBase}`
+          : `${base.provider}/${base.modelId}`;
+        await window.onboarding.setConfig('env.POLYSPACE_LLM_BASE_MODEL', modelStr);
+        if (base.apiKey) {
+          await window.onboarding.setConfig('env.POLYSPACE_LLM_BASE_API_KEY', base.apiKey);
+        }
+      }
+      if (configs.strong) {
+        await window.onboarding.setConfig('env.POLYSPACE_LLM_STRONG_MODEL', `${configs.strong.provider}/${configs.strong.modelId}`);
+      }
+      if (configs.performance) {
+        await window.onboarding.setConfig('env.POLYSPACE_LLM_PERFORMANCE_MODEL', `${configs.performance.provider}/${configs.performance.modelId}`);
+      }
+      if (configs.cost_effective) {
+        await window.onboarding.setConfig('env.POLYSPACE_LLM_COST_EFFECTIVE_MODEL', `${configs.cost_effective.provider}/${configs.cost_effective.modelId}`);
+      }
+      if (configs.vertical_multimodal) {
+        await window.onboarding.setConfig('env.POLYSPACE_LLM_MULTIMODAL_MODEL', `${configs.vertical_multimodal.provider}/${configs.vertical_multimodal.modelId}`);
+      }
+    }
+
+    async function saveSettings() {
+      await window.onboarding.setConfig('general.theme', document.getElementById('setting-theme').value);
+      await window.onboarding.setConfig('general.language', document.getElementById('setting-language').value);
+      await window.onboarding.setConfig('general.autoStart', settingToggles.autostart);
+      await window.onboarding.setConfig('general.minimizeToTray', settingToggles.tray);
+    }
+
+    async function runAutoConfig() {
+      const progressBar = document.getElementById('progressBar');
+      const progressText = document.getElementById('progressText');
+      const progressDetail = document.getElementById('progressDetail');
+      const steps = [
+        { pct: 15, text: 'Saving configuration...', detail: 'Writing settings to disk' },
+        { pct: 30, text: 'Configuring AI models...', detail: 'Setting up model tiers' },
+        { pct: 50, text: 'Applying file associations...', detail: 'Registering default app' },
+        { pct: 70, text: 'Setting up workspace...', detail: 'Preparing your environment' },
+        { pct: 85, text: 'Finalizing...', detail: 'Almost done' },
+        { pct: 100, text: 'All set!', detail: '' },
+      ];
+      for (const step of steps) {
+        await new Promise(r => setTimeout(r, 400 + Math.random() * 300));
+        progressBar.style.width = step.pct + '%';
+        progressText.textContent = step.text;
+        progressDetail.textContent = step.detail;
+      }
+      await new Promise(r => setTimeout(r, 500));
+      document.getElementById('progressCheck').style.display = 'flex';
+      progressText.textContent = 'Setup complete!';
+      progressDetail.textContent = '';
+      await new Promise(r => setTimeout(r, 800));
+      await window.onboarding.complete();
+    }
+
+    init();
+  </script>
+</body>
+</html>

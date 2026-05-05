@@ -1,0 +1,25 @@
+{
+  "id": "f8a714d3289d",
+  "name": "creative-writer",
+  "description": "创意写作技能，支持故事、诗歌、文案等多种创作风格",
+  "category": "creative",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "pen-tool",
+  "tags": [
+    "writing",
+    "creative",
+    "story"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:42.055782",
+  "updated_at": "2026-04-19T15:45:42.055782"
+}

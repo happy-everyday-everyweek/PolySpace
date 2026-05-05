@@ -1,0 +1,14 @@
+name: brainstorming
+description: "You MUST use this before any creative work - creating features, building components, adding functionality, or modifying behavior. Explores user intent, requirements and design before implementation."
+version: "1.0.0"
+author: obra-superpowers
+category: coding
+entry_point: main.py
+parameters:
+  idea_description:
+    type: string
+    description: The idea or feature to brainstorm into a design
+  project_context:
+    type: string
+    description: Current project context or constraints
+    default: ""

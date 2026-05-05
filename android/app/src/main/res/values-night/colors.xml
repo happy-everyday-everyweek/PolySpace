@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="polyspace_primary_dark">#FFE0E0E0</color>
+    <color name="polyspace_on_primary_dark">#FF000000</color>
+    <color name="polyspace_primary_container_dark">#FF1E1E1E</color>
+    <color name="polyspace_on_primary_container_dark">#FFE0E0E0</color>
+    <color name="polyspace_secondary_dark">#FFAAAAAA</color>
+    <color name="polyspace_on_secondary_dark">#FF000000</color>
+    <color name="polyspace_secondary_container_dark">#FF2A2A2A</color>
+    <color name="polyspace_on_secondary_container_dark">#FFE0E0E0</color>
+    <color name="polyspace_background_dark">#FF121212</color>
+    <color name="polyspace_on_background_dark">#FFE0E0E0</color>
+    <color name="polyspace_surface_dark">#FF1E1E1E</color>
+    <color name="polyspace_on_surface_dark">#FFE0E0E0</color>
+    <color name="polyspace_error_dark">#FFE0E0E0</color>
+    <color name="polyspace_on_error_dark">#FF000000</color>
+    <color name="status_running_dark">#FFE0E0E0</color>
+    <color name="status_stopped_dark">#FF757575</color>
+    <color name="status_error_dark">#FF999999</color>
+    <color name="status_starting_dark">#FFAAAAAA</color>
+</resources>

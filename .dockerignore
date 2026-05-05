@@ -1,0 +1,17 @@
+node_modules
+.venv
+__pycache__
+*.pyc
+.git
+dist
+build
+*.apk
+*.exe
+.android
+.gradle
+.idea
+.vscode
+*.log
+*.db
+*.tar.gz
+.trac

@@ -1,0 +1,25 @@
+{
+  "id": "212c6b745e44",
+  "name": "workflow-automator",
+  "description": "工作流自动化技能，将重复操作编排为自动化流程",
+  "category": "automation",
+  "version": "1.0.0",
+  "author": "PolySpace",
+  "author_id": "system",
+  "icon": "workflow",
+  "tags": [
+    "automation",
+    "workflow",
+    "efficiency"
+  ],
+  "entry_point": "",
+  "parameters": {},
+  "status": "published",
+  "downloads": 0,
+  "rating": 0.0,
+  "rating_count": 0,
+  "reviews": [],
+  "dependencies": [],
+  "created_at": "2026-04-19T15:45:41.962751",
+  "updated_at": "2026-04-19T15:45:41.962751"
+}

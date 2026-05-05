@@ -1,0 +1,89 @@
+{
+  "name": "polyspace-desktop",
+  "version": "1.0.0",
+  "description": "PolySpace Desktop Client",
+  "main": "src/main/index.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev",
+    "build": "electron-builder",
+    "build:win": "electron-builder --win"
+  },
+  "dependencies": {
+    "electron-log": "^5.2.4",
+    "electron-store": "^8.1.0",
+    "screenshot-desktop": "^1.15.0",
+    "ws": "^8.16.0"
+  },
+  "optionalDependencies": {
+    "robotjs": "^0.6.0"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.polyspace.desktop",
+    "productName": "PolySpace",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "src/**/*",
+      "resources/**/*"
+    ],
+    "fileAssociations": [
+      {
+        "ext": "ppt",
+        "name": "PowerPoint Presentation",
+        "description": "PowerPoint Presentation (PolySpace)",
+        "role": "Viewer"
+      },
+      {
+        "ext": "pptx",
+        "name": "PowerPoint Presentation",
+        "description": "PowerPoint Presentation (PolySpace)",
+        "role": "Viewer"
+      },
+      {
+        "ext": "xls",
+        "name": "Excel Spreadsheet",
+        "description": "Excel Spreadsheet (PolySpace)",
+        "role": "Viewer"
+      },
+      {
+        "ext": "xlsx",
+        "name": "Excel Spreadsheet",
+        "description": "Excel Spreadsheet (PolySpace)",
+        "role": "Viewer"
+      },
+      {
+        "ext": "doc",
+        "name": "Word Document",
+        "description": "Word Document (PolySpace)",
+        "role": "Viewer"
+      },
+      {
+        "ext": "docx",
+        "name": "Word Document",
+        "description": "Word Document (PolySpace)",
+        "role": "Viewer"
+      },
+      {
+        "ext": "pdf",
+        "name": "PDF Document",
+        "description": "PDF Document (PolySpace)",
+        "role": "Viewer"
+      }
+    ],
+    "win": {
+      "target": "nsis",
+      "icon": "resources/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true
+    }
+  }
+}
