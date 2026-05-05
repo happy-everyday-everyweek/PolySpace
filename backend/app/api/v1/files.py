@@ -3,9 +3,12 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
+
+from app.api.v1.auth import get_current_user
+from app.services.auth_service import User
 
 router = APIRouter()
 
@@ -55,7 +58,9 @@ def _scan_dir(base_dir: str, rel_path: str = "") -> list[dict]:
 
 
 @router.post("/upload")
-async def upload_file(file: UploadFile = File(...), subdir: str = ""):
+async def upload_file(file: UploadFile = File(...), subdir: str = "", current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     allowed_ext = {
@@ -107,7 +112,9 @@ async def upload_file(file: UploadFile = File(...), subdir: str = ""):
 
 
 @router.get("/list")
-async def list_files(path: Optional[str] = Query(None)):
+async def list_files(path: Optional[str] = Query(None), current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     rel = path or ""
     try:
         _safe_join(UPLOAD_DIR, rel)
@@ -118,7 +125,9 @@ async def list_files(path: Optional[str] = Query(None)):
 
 
 @router.get("/read/{file_id}")
-async def read_file(file_id: str):
+async def read_file(file_id: str, current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     info = _file_registry.get(file_id)
     if not info:
         for fid, reg in _file_registry.items():
@@ -150,7 +159,9 @@ async def read_file(file_id: str):
 
 
 @router.delete("/delete/{file_id}")
-async def delete_file(file_id: str):
+async def delete_file(file_id: str, current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     info = _file_registry.get(file_id)
     if not info:
         raise HTTPException(status_code=404, detail="File not found")
@@ -162,7 +173,9 @@ async def delete_file(file_id: str):
 
 
 @router.get("/download/{file_id}")
-async def download_file(file_id: str):
+async def download_file(file_id: str, current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     info = _file_registry.get(file_id)
     if not info:
         for fid, reg in _file_registry.items():
@@ -193,7 +206,9 @@ class FileWriteRequest(BaseModel):
 
 
 @router.post("/write")
-async def write_file(req: FileWriteRequest):
+async def write_file(req: FileWriteRequest, current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if ".." in req.path or req.path.startswith("/") or req.path.startswith("\\"):
         raise HTTPException(status_code=400, detail="Invalid path")
     dest_dir = _safe_join(UPLOAD_DIR, req.subdir)

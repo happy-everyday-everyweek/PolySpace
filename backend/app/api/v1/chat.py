@@ -2,12 +2,14 @@ import json
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from app.api.v1.auth import get_current_user
 from app.core.exceptions import ServiceUnavailableError
 from app.dependencies import container
+from app.services.auth_service import User
 
 router = APIRouter()
 
@@ -35,7 +37,9 @@ def _get_chat_service():
 
 
 @router.post("/send", response_model=ChatResponse)
-async def send_message(request: ChatRequest):
+async def send_message(request: ChatRequest, current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     session_id = request.session_id or str(uuid.uuid4())
     chat_service = _get_chat_service()
 
@@ -74,7 +78,9 @@ async def send_message(request: ChatRequest):
 
 
 @router.post("/stream")
-async def stream_message(request: ChatRequest):
+async def stream_message(request: ChatRequest, current_user: Optional[User] = Depends(get_current_user)):
+    if not current_user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     session_id = request.session_id or str(uuid.uuid4())
     chat_service = _get_chat_service()
 
