@@ -1,5 +1,15 @@
 <template>
   <div class="ppt-editor">
+    <OnlyOfficeEditor
+      v-if="useOnlyOffice"
+      document-type="slide"
+      :mode="editorMode"
+      :doc-id="ooDocId"
+      @fallback="useOnlyOffice = false"
+      @ready="onOnlyOfficeReady"
+      @saved="onOnlyOfficeSaved"
+    />
+    <template v-else>
     <div class="lo-menubar">
       <div class="menu-item" v-for="menu in pptMenus" :key="menu.label" @click="toggleMenu(menu.label)" @mouseenter="openMenuOnHover(menu.label)">
         {{ menu.label }}
@@ -539,12 +549,14 @@
     </div>
 
     <input type="file" ref="imageInput" accept="image/*" style="display:none" @change="onImageSelected" />
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, onBeforeUnmount, watch } from 'vue'
 import api from '../../utils/api'
+import OnlyOfficeEditor from './OnlyOfficeEditor.vue'
 import { useDocumentPersistence } from '@/composables/useDocumentPersistence'
 import { useAppSettings } from '@/composables/useAppSettings'
 
@@ -643,6 +655,13 @@ const aiLoading = ref(false)
 const aiResult = ref<any>(null)
 const aiCurrentAction = ref('')
 const activeRibbonTab = ref('home')
+
+const useOnlyOffice = ref(true)
+const ooDocId = ref<string | null>(null)
+const editorMode = ref('edit')
+
+function onOnlyOfficeReady() {}
+function onOnlyOfficeSaved() {}
 const activeMenu = ref('')
 
 const pptRibbonTabs = [

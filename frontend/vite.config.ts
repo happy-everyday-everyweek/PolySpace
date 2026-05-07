@@ -20,6 +20,11 @@ export default defineConfig({
         target: 'ws://localhost:8000',
         ws: true,
       },
+      '/docs-api': {
+        target: 'http://localhost:8084',
+        changeOrigin: true,
+        rewrite: (path) => path.replace(/^\/docs-api/, '/api'),
+      },
     },
   },
   build: {

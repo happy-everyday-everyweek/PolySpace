@@ -1,5 +1,15 @@
 <template>
   <div class="document-editor">
+    <OnlyOfficeEditor
+      v-if="useOnlyOffice"
+      document-type="word"
+      :mode="editorMode"
+      :doc-id="ooDocId"
+      @fallback="useOnlyOffice = false"
+      @ready="onOnlyOfficeReady"
+      @saved="onOnlyOfficeSaved"
+    />
+    <template v-else>
     <div class="lo-menubar">
       <div class="menu-item" v-for="menu in menus" :key="menu.label" @click="toggleMenu(menu.label)" @mouseenter="openMenuOnHover(menu.label)">
         {{ menu.label }}
@@ -359,6 +369,7 @@
         </div>
       </div>
     </div>
+    </template>
   </div>
 </template>
 
@@ -389,6 +400,7 @@ import api from '../../utils/api'
 import { useActivityStore } from '@/stores/activity'
 import { useWorkspaceStore } from '@/stores/workspace'
 import AiAssistantPanel from './AiAssistantPanel.vue'
+import OnlyOfficeEditor from './OnlyOfficeEditor.vue'
 import { useDocumentPersistence } from '@/composables/useDocumentPersistence'
 import { useAppSettings } from '@/composables/useAppSettings'
 
@@ -430,6 +442,18 @@ const currentTextColor = ref('#000000')
 const currentHighlightColor = ref('#fef08a')
 const activeRibbonTab = ref('home')
 const activeMenu = ref('')
+
+const useOnlyOffice = ref(true)
+const ooDocId = ref<string | null>(null)
+const editorMode = ref('edit')
+
+function onOnlyOfficeReady() {
+  // ONLYOFFICE editor is ready
+}
+
+function onOnlyOfficeSaved() {
+  // Document saved via ONLYOFFICE callback
+}
 
 const ribbonTabs = [
   { id: 'home', label: 'Home' },

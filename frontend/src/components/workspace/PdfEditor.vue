@@ -1,5 +1,15 @@
 <template>
   <div class="pdf-editor">
+    <OnlyOfficeEditor
+      v-if="useOnlyOffice"
+      document-type="pdf"
+      mode="view"
+      :doc-id="ooDocId"
+      @fallback="useOnlyOffice = false"
+      @ready="onOnlyOfficeReady"
+      @saved="onOnlyOfficeSaved"
+    />
+    <template v-else>
     <div class="pdf-toolbar">
       <div class="toolbar-left">
         <button class="tool-btn" @click="triggerUpload" title="Open PDF">
@@ -388,15 +398,23 @@
     </div>
 
     <div v-if="statusMessage" :class="['status-bar', statusType]">{{ statusMessage }}</div>
+    </template>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import api from '../../utils/api'
+import OnlyOfficeEditor from './OnlyOfficeEditor.vue'
 import { useAppSettings } from '@/composables/useAppSettings'
 
 const pdfDefaults = useAppSettings('pdf').settings.value
+
+const useOnlyOffice = ref(true)
+const ooDocId = ref<string | null>(null)
+
+function onOnlyOfficeReady() {}
+function onOnlyOfficeSaved() {}
 
 const fileInput = ref<HTMLInputElement | null>(null)
 const viewerContainer = ref<HTMLElement | null>(null)

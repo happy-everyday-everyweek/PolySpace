@@ -1,5 +1,15 @@
 <template>
   <div class="excel-editor" @keydown="handleGlobalKeydown" tabindex="0" ref="editorRef">
+    <OnlyOfficeEditor
+      v-if="useOnlyOffice"
+      document-type="cell"
+      :mode="editorMode"
+      :doc-id="ooDocId"
+      @fallback="useOnlyOffice = false"
+      @ready="onOnlyOfficeReady"
+      @saved="onOnlyOfficeSaved"
+    />
+    <template v-else>
     <div class="lo-menubar">
       <div class="menu-item" v-for="menu in excelMenus" :key="menu.label" @click="toggleMenu(menu.label)" @mouseenter="openMenuOnHover(menu.label)">
         {{ menu.label }}
@@ -383,6 +393,7 @@
     </div>
 
     <input type="file" ref="csvInputRef" accept=".csv" class="hidden-input" @change="handleCSVImport" />
+    </template>
   </div>
 </template>
 
@@ -391,6 +402,7 @@ import { ref, reactive, computed, onBeforeUnmount, watch, nextTick } from 'vue'
 import api from '../../utils/api'
 import AiAssistantPanel from './AiAssistantPanel.vue'
 import { useDocumentPersistence } from '@/composables/useDocumentPersistence'
+import OnlyOfficeEditor from './OnlyOfficeEditor.vue'
 import { useSpreadsheetEngine } from '@/composables/useSpreadsheetEngine'
 import type { CellFormat, NumberFormat } from '@/composables/useSpreadsheetEngine'
 
@@ -418,6 +430,13 @@ const aiLoading = ref(false)
 const aiResult = ref<any>(null)
 const aiCurrentAction = ref('')
 const activeRibbonTab = ref('home')
+
+const useOnlyOffice = ref(true)
+const ooDocId = ref<string | null>(null)
+const editorMode = ref('edit')
+
+function onOnlyOfficeReady() {}
+function onOnlyOfficeSaved() {}
 const activeMenu = ref('')
 
 const excelRibbonTabs = [
