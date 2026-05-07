@@ -432,6 +432,8 @@ if [ -d /home/polyspace/open-design ] && [ ! -d /home/polyspace/open-design/node
     echo "Installing open-design dependencies..."
     cd /home/polyspace/open-design
     pnpm install --frozen-lockfile 2>/dev/null || pnpm install 2>/dev/null || npm install 2>/dev/null || true
+    echo "Building open-design..."
+    pnpm run build 2>/dev/null || npm run build 2>/dev/null || true
     cd /home/polyspace
 fi
 
