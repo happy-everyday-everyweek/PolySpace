@@ -47,7 +47,7 @@ const TOOL_NAME_MAP: Record<string, string> = {
   calendar: '日历',
   todo: '待办',
   knowledge: '知识库',
-  memo: '备忘录',
+  notes: '笔记',
   kanban: '看板',
   memory: '记忆',
   coordination: '协调',

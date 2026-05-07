@@ -1,7 +1,7 @@
 import { ref } from 'vue'
 import { useChatStore } from '@/stores/chat'
 import { API_BASE } from '@/utils/constants'
-import type { ChatMessage, EmotionState, InnerVoice, ToolCall, ToolResult } from '@/types/chat'
+import type { ChatMessage, EmotionState, InnerVoice, ToolCall } from '@/types/chat'
 
 export function useChat() {
   const chatStore = useChatStore()

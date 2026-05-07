@@ -45,7 +45,6 @@ export default {
       calendar: 'Calendar',
       knowledge: 'Knowledge',
       todo: 'Todo',
-      memo: 'Memo',
       email: 'Email',
       kanban: 'Kanban',
       contacts: 'Contacts',

@@ -80,7 +80,7 @@ When writing code, always return structured JSON:
   "warnings": ["potential issues or caveats"]
 }""",
         tools=[
-            "knowledge", "memo", "memory",
+            "knowledge", "notes", "memory",
             "skill_diagnose", "skill_tdd",
             "skill_improve-codebase-architecture",
             "skill_grill-with-docs",
@@ -116,7 +116,7 @@ def _create_writing_agent() -> VerticalAgent:
 
 Always match the tone, style, and format to the intended audience and purpose.
 Return structured JSON with the content and metadata.""",
-        tools=["knowledge", "memo", "memory", "skill_zoom-out", "skill_to-prd"],
+        tools=["knowledge", "notes", "memory", "skill_zoom-out", "skill_to-prd"],
     )
 
 
@@ -146,7 +146,7 @@ def _create_data_agent() -> VerticalAgent:
 
 Always provide clear explanations of your methodology and confidence levels.
 Return structured JSON with analysis results, visualizations, and recommendations.""",
-        tools=["knowledge", "memo", "memory", "skill_zoom-out", "skill_diagnose"],
+        tools=["knowledge", "notes", "memory", "skill_zoom-out", "skill_diagnose"],
     )
 
 
@@ -176,7 +176,7 @@ def _create_research_agent() -> VerticalAgent:
 
 Always cite sources, indicate confidence levels, and distinguish between facts and inferences.
 Return structured JSON with findings, sources, and confidence assessments.""",
-        tools=["knowledge", "memo", "memory", "skill_zoom-out", "skill_to-prd"],
+        tools=["knowledge", "notes", "memory", "skill_zoom-out", "skill_to-prd"],
     )
 
 
@@ -202,7 +202,7 @@ def _create_seo_agent() -> VerticalAgent:
 """ + _SKILL_INVOKE + """
 
 Always return structured JSON with actionable SEO recommendations.""",
-        tools=["knowledge", "memo", "memory", "skill_zoom-out"],
+        tools=["knowledge", "notes", "memory", "skill_zoom-out"],
     )
 
 
@@ -291,7 +291,7 @@ def _create_devops_agent() -> VerticalAgent:
 Always prioritize reliability, security, and observability.
 Return structured JSON with configurations, commands, and explanations.""",
         tools=[
-            "knowledge", "memo", "memory",
+            "knowledge", "notes", "memory",
             "skill_diagnose", "skill_triage",
             "skill_to-issues", "skill_zoom-out",
         ],
@@ -324,7 +324,7 @@ def _create_design_agent() -> VerticalAgent:
 
 Always consider usability, accessibility, and visual consistency.
 Return structured JSON with design specifications and rationale.""",
-        tools=["knowledge", "memo", "memory", "skill_zoom-out", "skill_grill-with-docs"],
+        tools=["knowledge", "notes", "memory", "skill_zoom-out", "skill_grill-with-docs"],
     )
 
 

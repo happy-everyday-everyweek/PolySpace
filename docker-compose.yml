@@ -1,0 +1,54 @@
+services:
+  onlyoffice-documentserver:
+    image: onlyoffice/documentserver:9.3.1
+    container_name: polyspace-onlyoffice
+    restart: unless-stopped
+    ports:
+      - "8443:443"
+      - "8082:80"
+    environment:
+      - JWT_ENABLED=true
+      - JWT_SECRET=polyspace_docs_secret_2026
+      - JWT_HEADER=Authorization
+      - JWT_IN_BODY=true
+      - ALLOW_META_IP_ADDRESS=true
+      - ALLOW_PRIVATE_IP_ADDRESS=true
+      - USE_UNAUTHORIZED_STORAGE=true
+    volumes:
+      - onlyoffice_logs:/var/log/onlyoffice
+      - onlyoffice_data:/var/www/onlyoffice/Data
+      - onlyoffice_lib:/var/lib/onlyoffice
+      - onlyoffice_fonts:/usr/share/fonts/truetype/custom
+    networks:
+      - polyspace-network
+
+  docs-service:
+    build:
+      context: ./docs-service
+      dockerfile: Dockerfile
+    container_name: polyspace-docs-service
+    restart: unless-stopped
+    ports:
+      - "8084:8084"
+    environment:
+      - ONLYOFFICE_URL=http://onlyoffice-documentserver
+      - ONLYOFFICE_JWT_SECRET=polyspace_docs_secret_2026
+      - STORAGE_PATH=/data/documents
+      - POLYSPACE_BACKEND_URL=http://host.docker.internal:8000
+    volumes:
+      - docs_storage:/data/documents
+    depends_on:
+      - onlyoffice-documentserver
+    networks:
+      - polyspace-network
+
+volumes:
+  onlyoffice_logs:
+  onlyoffice_data:
+  onlyoffice_lib:
+  onlyoffice_fonts:
+  docs_storage:
+
+networks:
+  polyspace-network:
+    driver: bridge

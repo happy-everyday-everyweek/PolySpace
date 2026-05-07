@@ -34,6 +34,14 @@ litellm-*/
 openakita-*/
 system_prompts_leaks/
 system_prompts_leaks-main/
+inkos-master/
+Vibe-Trading-main/
+cua-main/
+OpenCLI-main/
+open-design-main/
+nocobase-*/
+agency-agents-*/
+OpenKiwi-master/
 
 # Large binary files
 *.tar.gz

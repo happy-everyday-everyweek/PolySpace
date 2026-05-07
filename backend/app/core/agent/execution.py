@@ -87,15 +87,23 @@ class ExecutionAgent(BaseAgent):
         memory_context = "\n".join(m.content for m in memories) if memories else ""
 
         tools_info = ""
+        excluded_tools = {"execute_task", "read_file", "search"}
         if self._tool_registry:
             tool_defs = self._tool_registry.get_definitions()
+            filtered_defs = [
+                t for t in tool_defs
+                if t.get("function", {}).get("name") not in excluded_tools
+            ]
             tool_details = []
-            for t in tool_defs:
+            for t in filtered_defs:
                 func = t.get("function", {})
                 name = func.get("name", "")
                 desc = func.get("description", "")
                 params = func.get("parameters", {}).get("properties", {})
-                param_desc = ", ".join(f"{k}: {v.get('description', v.get('type', ''))}" for k, v in params.items())
+                param_desc = ", ".join(
+                    f"{k}: {v.get('description', v.get('type', ''))}"
+                    for k, v in params.items()
+                )
                 tool_details.append(f"- {name}: {desc} (参数: {param_desc})")
             if tool_details:
                 tools_info = (
@@ -111,31 +119,22 @@ class ExecutionAgent(BaseAgent):
                     "5. 如果工具调用失败，尝试替代方案或报告错误\n"
                 )
 
-        system_content = (
-            "你是 PolySpace AI 系统中的任务执行Agent。你的职责是高效准确地完成任务。\n\n"
-            "## 核心行为准则\n"
-            "- 专注于产生正确、可操作的结果\n"
-            "- 不要添加情感或对话元素\n"
-            "- 将复杂任务分解为可管理的步骤\n"
-            "- 必须优先使用可用工具完成任务，而不是只用文字回复\n"
-            "- 如果工具调用失败，尝试替代方案或报告错误\n\n"
-            "## 工具使用规则（关键）\n"
-            "- 你必须主动调用工具来完成任务，不要只回复文字\n"
-            "- 仅使用系统提供的工具定义\n"
-            "- 不要假设你有额外的工具或能力\n"
-            "- 如果请求超出工具能力范围，明确告知\n"
-            "- 每一步思考时都要问自己：是否有工具可以帮助完成这一步？\n"
+        from app.core.agent.prompts import build_execution_prompt
+        system_content = build_execution_prompt(
+            task_description="",
+            tools_info=tools_info,
+            execution_context=memory_context,
         )
-        if tools_info:
-            system_content += f"\n{tools_info}\n"
-        if memory_context:
-            system_content += f"\n## 相关上下文\n{memory_context}\n"
 
         messages = [{"role": "system", "content": system_content}]
         for msg in self._context.messages:
             messages.append({"role": msg.role, "content": msg.content})
 
-        tools = self._tool_registry.get_definitions() if self._tool_registry else None
+        tools = (
+            [t for t in self._tool_registry.get_definitions()
+             if t.get("function", {}).get("name") not in excluded_tools]
+            if self._tool_registry else None
+        )
 
         response = await self._dispatcher.dispatch(
             TaskCategory.DAILY,

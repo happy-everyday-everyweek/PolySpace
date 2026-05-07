@@ -71,10 +71,10 @@ WORKSPACE_CONTEXT_MAP: dict[str, dict[str, Any]] = {
         "actions": ["管理任务", "排列优先级", "分解任务", "追踪进度"],
         "encouragement_angles": ["任务推进", "执行效率", "目标达成"],
     },
-    "memo": {
-        "label": "备忘录",
-        "actions": ["记录想法", "整理笔记", "提取要点", "分类归档"],
-        "encouragement_angles": ["记录习惯", "思维整理", "灵感捕捉"],
+    "notes": {
+        "label": "笔记",
+        "actions": ["记录想法", "整理笔记", "提取要点", "知识扩展", "AI润色"],
+        "encouragement_angles": ["记录习惯", "思维整理", "灵感捕捉", "知识发芽"],
     },
     "email": {
         "label": "邮件处理",

@@ -92,6 +92,64 @@ class ServiceContainer:
 container = ServiceContainer()
 
 
+def _register_all_tools(tool_registry) -> None:
+    from app.core.tool.interaction_tools import (
+        ExecuteTaskTool,
+        ReadFileTool,
+        SearchAggregateTool,
+    )
+
+    for tool_cls in (ReadFileTool, SearchAggregateTool, ExecuteTaskTool):
+        try:
+            instance = tool_cls()
+            existing = tool_registry.get(instance.name)
+            if not existing:
+                tool_registry.register(instance)
+        except Exception as e:
+            logger.warning("Failed to register tool %s: %s", tool_cls.__name__, e)
+
+    _core_tools = [
+        ("browser", "app.core.tools.browser_tool", "BrowserTool"),
+        ("screen_operation", "app.core.tools.desktop_tool", "DesktopTool"),
+        ("shell", "app.core.tools.shell_tool", "ShellTool"),
+        ("search", "app.core.tools.search_tool", "SearchTool"),
+        ("scheduler", "app.core.tools.scheduler_tool", "SchedulerTool"),
+        ("file", "app.core.tools.file_tool", "FileTool"),
+        ("pdf", "app.core.tools.pdf_tool", "PDFTool"),
+        ("open_design", "app.core.tools.open_design_tool", "OpenDesignTool"),
+        ("nocobase", "app.core.tools.nocobase_tool", "NocoBaseTool"),
+    ]
+    for tool_name, module_path, class_name in _core_tools:
+        try:
+            import importlib
+            mod = importlib.import_module(module_path)
+            cls = getattr(mod, class_name)
+            existing = tool_registry.get(tool_name)
+            if not existing:
+                tool_registry.register(cls())
+        except Exception as e:
+            logger.warning("Failed to register %s: %s", tool_name, e)
+
+    _bulk_registrars = [
+        ("extension", "app.core.tool.extension_tools", "register_extension_tools"),
+        ("workspace", "app.core.tool.workspace_tools", "register_workspace_tools"),
+        ("enhanced", "app.core.tool.enhanced_tools", "register_enhanced_tools"),
+        ("cross_app", "app.core.tool.cross_app_tools", "register_cross_app_tools"),
+    ]
+    for label, module_path, func_name in _bulk_registrars:
+        try:
+            import importlib
+            mod = importlib.import_module(module_path)
+            func = getattr(mod, func_name)
+            func()
+            logger.info("Registered %s tools via %s", label, func_name)
+        except Exception as e:
+            logger.warning("Failed to register %s tools: %s", label, e)
+
+    registered = list(tool_registry._tools.keys())
+    logger.info("Total registered %d tools: %s", len(registered), registered)
+
+
 def _init_services() -> None:
     from app.core.agent.cron import CronService
     from app.core.agent.evolution import SelfEvolutionEngine
@@ -126,6 +184,7 @@ def _init_services() -> None:
     if not container.get("tool_registry"):
         tool_registry = ToolRegistry()
         container.register("tool_registry", tool_registry)
+        _register_all_tools(tool_registry)
 
     if not container.get("capability_registry"):
         from app.core.capability.providers.cli import CLIProvider

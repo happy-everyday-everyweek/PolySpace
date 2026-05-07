@@ -453,11 +453,10 @@ class GlobalSearchTool(BaseTool):
             except Exception:
                 pass
             try:
-                from app.services.memo_service import MemoService
-                svc = MemoService()
-                memos = await svc.search_memos(query)
-                for m in memos:
-                    results.append({"type": "memo", "id": m.memo_id, "title": m.title})
+                from app.services.notes_service import notes_service
+                notes = await notes_service.search_notes(query)
+                for n in notes:
+                    results.append({"type": "notes", "id": n.id, "title": n.title})
             except Exception:
                 pass
             try:

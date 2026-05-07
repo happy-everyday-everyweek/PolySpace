@@ -35,7 +35,7 @@ async def unified_search(
     scope: Optional[str] = Query(
         None,
         description=(
-            "Search scope: all,knowledge,memo,todo,"
+            "Search scope: all,knowledge,notes,todo,"
             "document,calendar,chat,memory,command,app,setting,action,navigation"
         ),
     ),

@@ -496,80 +496,6 @@ class KanbanManageTool(BaseTool):
         pass
 
 
-class MemoManageTool(BaseTool):
-    def __init__(self):
-        super().__init__(
-            name="memo_manage",
-            description="Advanced memo management: pin, color coding, templates, batch operations, export, organize, archive, version, share, encrypt, reminders",
-            parameters={
-                "type": "object",
-                "properties": {
-                    "action": {
-                        "type": "string",
-                        "enum": ["pin", "color", "template", "batch", "export",
-                                 "organize", "archive", "version", "share",
-                                 "encrypt", "reminder", "link"],
-                        "description": "Advanced memo action",
-                    },
-                    "memo_id": {"type": "string", "description": "Memo ID"},
-                    "memo_ids": {"type": "array", "items": {"type": "string"}, "description": "Memo IDs for batch"},
-                    "color": {"type": "string", "description": "Color code or name"},
-                    "template_name": {"type": "string", "description": "Template name"},
-                    "export_format": {"type": "string", "enum": ["markdown", "html", "pdf", "txt", "json"], "description": "Export format"},
-                    "folder": {"type": "string", "description": "Folder for organizing"},
-                    "share_with": {"type": "string", "description": "Share with user"},
-                    "password": {"type": "string", "description": "Password for encryption"},
-                    "reminder_time": {"type": "string", "description": "Reminder time (ISO format)"},
-                    "link_to": {"type": "string", "description": "Memo ID to link to"},
-                    "title": {"type": "string", "description": "Memo title"},
-                    "content": {"type": "string", "description": "Memo content"},
-                    "tags": {"type": "array", "items": {"type": "string"}, "description": "Tags"},
-                },
-                "required": ["action"],
-            },
-        )
-
-    async def _on_activate(self) -> None:
-        pass
-
-    async def _on_call(self, **kwargs) -> Any:
-        action = kwargs.get("action", "organize")
-        try:
-            from app.services.memo_service import MemoService
-            svc = MemoService()
-            if action == "pin":
-                memo_id = kwargs.get("memo_id", "")
-                if kwargs.get("unpin", False):
-                    result = await svc.unpin_memo(memo_id)
-                else:
-                    result = await svc.pin_memo(memo_id)
-                return {"pinned": result is not None}
-            elif action == "batch":
-                return {"action": "workspace_command", "app": "memo", "command": "batch", "memo_ids": kwargs.get("memo_ids", [])}
-            elif action == "export":
-                memos = await svc.list_memos()
-                return {"exported": len(memos), "format": kwargs.get("export_format", "json")}
-            else:
-                return {
-                    "action": "workspace_command",
-                    "app": "memo",
-                    "command": action,
-                    "memo_id": kwargs.get("memo_id", ""),
-                    "color": kwargs.get("color", ""),
-                    "template_name": kwargs.get("template_name", ""),
-                    "folder": kwargs.get("folder", ""),
-                    "share_with": kwargs.get("share_with", ""),
-                    "reminder_time": kwargs.get("reminder_time", ""),
-                    "link_to": kwargs.get("link_to", ""),
-                    "tags": kwargs.get("tags", []),
-                }
-        except Exception as e:
-            return {"error": str(e)}
-
-    async def _on_hibernate(self) -> None:
-        pass
-
-
 class MemoryManageTool(BaseTool):
     def __init__(self):
         super().__init__(
@@ -1850,7 +1776,6 @@ def register_enhanced_tools():
         TodoManageTool(),
         KnowledgeManageTool(),
         KanbanManageTool(),
-        MemoManageTool(),
         MemoryManageTool(),
         CoordinationManageTool(),
         PdfManageTool(),

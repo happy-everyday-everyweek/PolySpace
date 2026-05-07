@@ -111,13 +111,20 @@ class KanbanCard(Base):
     __table_args__ = (Index("ix_kanban_cards_column", "column_name"),)
 
 
-class MemoItem(Base):
-    __tablename__ = "memo_items"
+class NoteItemDB(Base):
+    __tablename__ = "note_items"
 
     id: Mapped[str] = mapped_column(String(36), primary_key=True)
+    type: Mapped[str] = mapped_column(String(20), default="text")
     title: Mapped[str] = mapped_column(String(500), default="")
     content: Mapped[str] = mapped_column(Text, default="")
+    summary: Mapped[str] = mapped_column(Text, default="")
     tags: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    category: Mapped[Optional[str]] = mapped_column(String(100), nullable=True)
+    source_url: Mapped[Optional[str]] = mapped_column(String(2000), nullable=True)
+    attachments: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    sprout_report: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    pinned: Mapped[bool] = mapped_column(Boolean, default=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=func.now())
     updated_at: Mapped[datetime] = mapped_column(DateTime, default=func.now(), onupdate=func.now())
 

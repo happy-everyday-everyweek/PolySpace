@@ -1,6 +1,7 @@
 {
   "name": "polyspace-desktop",
   "version": "1.0.0",
+  "author": "PolySpace Team",
   "description": "PolySpace Desktop Client",
   "main": "src/main/index.js",
   "scripts": {
@@ -30,7 +31,24 @@
     },
     "files": [
       "src/**/*",
-      "resources/**/*"
+      "resources/**/*",
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": ["**/*", "!**/tests/**", "!**/.venv/**", "!**/__pycache__/**", "!*.egg-info/**", "!polyspace_data/**", "!data/**"]
+      },
+      {
+        "from": "../frontend/dist",
+        "to": "frontend-dist",
+        "filter": ["**/*"]
+      }
+    ],
+    "extraResources": [
+      {
+        "from": "../backend",
+        "to": "backend",
+        "filter": ["**/*", "!**/tests/**", "!**/.venv/**", "!**/__pycache__/**", "!*.egg-info/**", "!polyspace_data/**", "!data/**"]
+      }
     ],
     "fileAssociations": [
       {
@@ -77,8 +95,7 @@
       }
     ],
     "win": {
-      "target": "nsis",
-      "icon": "resources/icon.ico"
+      "target": "nsis"
     },
     "nsis": {
       "oneClick": false,

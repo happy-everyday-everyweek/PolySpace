@@ -146,8 +146,8 @@ class SearchService:
         if scope in ("all", "knowledge"):
             results.extend(await self._search_knowledge(query))
 
-        if scope in ("all", "memo"):
-            results.extend(await self._search_memos(query))
+        if scope in ("all", "notes"):
+            results.extend(await self._search_notes(query))
 
         if scope in ("all", "todo"):
             results.extend(await self._search_todos(query))
@@ -225,24 +225,24 @@ class SearchService:
             logger.debug("Search sub-task failed: %s", e)
         return results
 
-    async def _search_memos(self, query: str) -> list[tuple[float, SearchResult]]:
+    async def _search_notes(self, query: str) -> list[tuple[float, SearchResult]]:
         results: list[tuple[float, SearchResult]] = []
         try:
-            from app.services.memo_service import memo_service
-            memos = await memo_service.search_memos(query)
-            for memo in memos[:10]:
-                score = self._text_match_score(query, memo.title, memo.content)
+            from app.services.notes_service import notes_service
+            notes = await notes_service.search_notes(query)
+            for note in notes[:10]:
+                score = self._text_match_score(query, note.title, note.content)
                 if score > 0.05:
                     results.append((
                         score,
                         SearchResult(
-                            id=f"memo-{memo.memo_id}",
-                            title=memo.title,
-                            description=memo.content[:120] if memo.content else "",
-                            category="memo",
-                            icon="sticky-note",
+                            id=f"notes-{note.id}",
+                            title=note.title,
+                            description=note.content[:120] if note.content else "",
+                            category="notes",
+                            icon="edit-3",
                             action="open_app",
-                            action_data={"app": "memo", "memo_id": memo.memo_id},
+                            action_data={"app": "notes", "note_id": note.id},
                             score=round(score, 3),
                         ),
                     ))

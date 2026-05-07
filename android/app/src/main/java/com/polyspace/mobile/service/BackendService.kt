@@ -372,6 +372,7 @@ class BackendService : Service() {
                             updateNotification(host, port, BackendStatus.RUNNING, _startupPhase)
                             val prefs = getSharedPreferences(PREFS_NAME, 0)
                             prefs.edit().remove(KEY_CRASH_COUNT).remove(KEY_LAST_CRASH_TIME).apply()
+                            launchSubServices(host, port)
                         }
                     } else {
                         consecutiveErrors++
@@ -407,6 +408,37 @@ class BackendService : Service() {
         }
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(channel)
+    }
+
+    private fun launchSubServices(host: String, port: Int) {
+        serviceScope.launch(Dispatchers.IO) {
+            delay(5000)
+            try {
+                val url = URL("http://$host:$port/api/v1/ai/workspace/design/daemon/start")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.connectTimeout = 15000
+                conn.readTimeout = 60000
+                val code = conn.responseCode
+                conn.disconnect()
+                android.util.Log.i("BackendService", "Design daemon start: $code")
+            } catch (e: Exception) {
+                android.util.Log.w("BackendService", "Design daemon not available", e)
+            }
+
+            try {
+                val url = URL("http://$host:$port/api/v1/ai/workspace/dev/daemon/start")
+                val conn = url.openConnection() as HttpURLConnection
+                conn.requestMethod = "POST"
+                conn.connectTimeout = 15000
+                conn.readTimeout = 60000
+                val code = conn.responseCode
+                conn.disconnect()
+                android.util.Log.i("BackendService", "Dev daemon start: $code")
+            } catch (e: Exception) {
+                android.util.Log.w("BackendService", "Dev daemon not available", e)
+            }
+        }
     }
 
     private fun createNotification(host: String, port: Int, status: BackendStatus, phase: StartupPhase = StartupPhase.IDLE): Notification {

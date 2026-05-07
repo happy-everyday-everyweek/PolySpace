@@ -524,15 +524,14 @@ class SearchAggregateTool(BaseTool):
             except Exception:
                 pass
 
-        if scope in ("all", "memos"):
+        if scope in ("all", "notes"):
             try:
-                from app.services.memo_service import MemoService
-                svc = MemoService()
-                memos = await svc.search_memos(query)
-                if memos:
-                    results["sources"]["memos"] = [
-                        {"id": m.memo_id, "title": m.title, "preview": (m.content or "")[:200]}
-                        for m in memos[:5]
+                from app.services.notes_service import notes_service
+                notes = await notes_service.search_notes(query)
+                if notes:
+                    results["sources"]["notes"] = [
+                        {"id": n.id, "title": n.title, "preview": (n.content or "")[:200]}
+                        for n in notes[:5]
                     ]
             except Exception:
                 pass

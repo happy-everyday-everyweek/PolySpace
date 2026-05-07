@@ -18,7 +18,7 @@ import urllib.request
 import zipfile
 from pathlib import Path
 
-ALPINE_VERSION = "v3.19"
+ALPINE_VERSION = "v3.21"
 ALPINE_MIRROR = "https://dl-cdn.alpinelinux.org/alpine"
 
 ASSETS_DIR = r"d:\PolySpace\android\app\src\main\assets"
@@ -31,6 +31,9 @@ WANTED_APK_PACKAGES = [
     "libssl3",
     "libcrypto3",
     "zlib",
+    "nodejs-current",
+    "npm",
+    "pnpm",
 ]
 
 MOBILE_PIP_PACKAGES = [
@@ -46,6 +49,32 @@ MOBILE_PIP_PACKAGES = [
     "websockets>=12.0",
     "litellm>=1.50",
 ]
+
+NODE_PROJECT_EXCLUDES = {
+    "node_modules", ".git", ".next", ".nuxt", "dist", ".cache",
+    ".turbo", "coverage", ".DS_Store", "tmp", ".env.local",
+}
+
+
+def _copy_node_project(src_dir, dest_dir):
+    if os.path.exists(dest_dir):
+        shutil.rmtree(dest_dir)
+    os.makedirs(dest_dir, exist_ok=True)
+
+    for root, dirs, files in os.walk(src_dir):
+        dirs[:] = [d for d in dirs if d not in NODE_PROJECT_EXCLUDES]
+        rel_root = os.path.relpath(root, src_dir)
+        if rel_root == ".":
+            target_root = dest_dir
+        else:
+            target_root = os.path.join(dest_dir, rel_root)
+        os.makedirs(target_root, exist_ok=True)
+        for f in files:
+            if f in (".DS_Store",):
+                continue
+            src_file = os.path.join(root, f)
+            dst_file = os.path.join(target_root, f)
+            shutil.copy2(src_file, dst_file)
 
 
 def download_file(url, dest=None, timeout=120):
@@ -366,6 +395,7 @@ def build_rootfs(android_abi, output_path):
     print("[6/7] Setting up backend code and configuration...")
     for d in ["proc", "sys", "dev", "tmp", "run",
               "home/polyspace/backend", "home/polyspace/data",
+              "home/polyspace/open-design", "home/polyspace/nocobase",
               "var/run", "var/log"]:
         os.makedirs(os.path.join(rootfs_dir, d), exist_ok=True)
 
@@ -388,8 +418,31 @@ export HOME=/home/polyspace
 export LD_LIBRARY_PATH=/usr/lib:/usr/local/lib
 export PYTHONPATH=/home/polyspace/backend:$PYTHONPATH
 
-# Wheels are pre-installed into site-packages at build time, skip pip install
+# Open Design daemon configuration
+export POLYSPACE_API_URL=http://127.0.0.1:8000
+export OPEN_DESIGN_PORT=3838
+export OPEN_DESIGN_HOST=127.0.0.1
 
+# NocoBase configuration
+export NOCOBASE_PORT=13000
+export NOCOBASE_HOST=127.0.0.1
+
+# Install Node.js dependencies on first boot (if not already installed)
+if [ -d /home/polyspace/open-design ] && [ ! -d /home/polyspace/open-design/node_modules ]; then
+    echo "Installing open-design dependencies..."
+    cd /home/polyspace/open-design
+    pnpm install --frozen-lockfile 2>/dev/null || pnpm install 2>/dev/null || npm install 2>/dev/null || true
+    cd /home/polyspace
+fi
+
+if [ -d /home/polyspace/nocobase ] && [ ! -d /home/polyspace/nocobase/node_modules ]; then
+    echo "Installing nocobase dependencies..."
+    cd /home/polyspace/nocobase
+    npm install 2>/dev/null || yarn install 2>/dev/null || true
+    cd /home/polyspace
+fi
+
+# Start PolySpace backend (blocks until exit)
 cd /home/polyspace/backend
 exec /usr/bin/python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log
 """)
@@ -405,6 +458,18 @@ exec /usr/bin/python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-ac
         pyproject = os.path.join(BACKEND_DIR, "pyproject.toml")
         if os.path.exists(pyproject):
             shutil.copy2(pyproject, backend_dest)
+
+    open_design_src = os.path.join(os.path.dirname(BACKEND_DIR), "open-design-main")
+    open_design_dest = os.path.join(rootfs_dir, "home/polyspace/open-design")
+    if os.path.isdir(open_design_src):
+        print("    Copying open-design project...")
+        _copy_node_project(open_design_src, open_design_dest)
+
+    nocobase_src = os.path.join(os.path.dirname(BACKEND_DIR), "nocobase")
+    nocobase_dest = os.path.join(rootfs_dir, "home/polyspace/nocobase")
+    if os.path.isdir(nocobase_src):
+        print("    Copying nocobase project...")
+        _copy_node_project(nocobase_src, nocobase_dest)
 
     print("[7/7] Creating tarball...")
     print(f"    Output: {output_path}")

@@ -1,4 +1,4 @@
-﻿<template>
+<template>
   <div class="ai-panel">
     <div class="ai-panel-header">
       <h4>AI: {{ actionLabel }}</h4>
@@ -174,14 +174,14 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 10px 14px;
+  padding: var(--spacing-sm) var(--spacing-md);
   border-bottom: 1px solid var(--border-color);
 }
 
 .ai-panel-header h4 {
   margin: 0;
-  font-size: 14px;
-  color: var(--primary-color);
+  font-size: var(--font-size-base);
+  color: var(--text-primary);
 }
 
 .close-btn {
@@ -189,54 +189,59 @@ defineEmits<{
   border: none;
   color: var(--text-tertiary);
   cursor: pointer;
-  padding: 4px;
-  border-radius: var(--radius-md);
+  padding: var(--spacing-xs);
+  border-radius: var(--radius-sm);
+  transition: all var(--transition-fast);
 }
 
 .close-btn:hover {
-  color: var(--text-color);
-  background: var(--border-color);
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.close-btn:active {
+  transform: scale(0.97);
 }
 
 .ai-panel-content {
   flex: 1;
   overflow-y: auto;
-  padding: 12px;
+  padding: var(--spacing-md);
 }
 
 .ai-loading {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
-  padding: 24px;
+  gap: var(--spacing-md);
+  padding: var(--spacing-xl);
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .spinner {
   width: 24px;
   height: 24px;
   border: 3px solid var(--border-color);
-  border-top-color: var(--primary-color);
-  border-radius: 50%;
+  border-top-color: var(--text-primary);
+  border-radius: var(--radius-full);
   animation: spin 0.8s linear infinite;
 }
 
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .ai-result {
-  color: var(--text-color);
+  color: var(--text-primary);
 }
 
 .ai-section {
-  margin-bottom: 16px;
+  margin-bottom: var(--spacing-lg);
 }
 
 .ai-section h5 {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--text-tertiary);
-  margin: 0 0 8px;
+  margin: 0 0 var(--spacing-sm);
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -244,21 +249,21 @@ defineEmits<{
 .text-result {
   white-space: pre-wrap;
   word-wrap: break-word;
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
   margin: 0;
   color: var(--text-secondary);
   background: var(--bg-tertiary);
-  padding: 10px;
+  padding: var(--spacing-sm);
   border-radius: var(--radius-lg);
 }
 
 .result-text {
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
   color: var(--text-secondary);
   margin: 0;
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
 }
@@ -268,79 +273,79 @@ defineEmits<{
 .adjusted-text,
 .continuation-text,
 .answer-text {
-  padding: 10px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
-  font-size: 13px;
-  line-height: 1.6;
-  margin-bottom: 12px;
-  color: var(--text-color);
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
 }
 
 .translation-meta {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-top: 8px;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-sm);
 }
 
 .lang-badge {
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
   background: var(--primary-light);
-  color: var(--primary-color);
+  color: var(--text-primary);
   border-radius: var(--radius-full);
-  font-weight: 500;
+  font-weight: var(--font-weight-medium);
 }
 
 .tone-badge {
   display: inline-block;
-  font-size: 11px;
-  padding: 2px 8px;
+  font-size: var(--font-size-xs);
+  padding: 2px var(--spacing-sm);
   background: var(--primary-light);
-  color: var(--primary-color);
+  color: var(--text-primary);
   border-radius: var(--radius-full);
-  font-weight: 500;
-  margin-top: 4px;
+  font-weight: var(--font-weight-medium);
+  margin-top: var(--spacing-xs);
 }
 
 .outline-item {
-  padding: 4px 0;
-  font-size: 13px;
+  padding: var(--spacing-xs) 0;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .outline-item.level-1 {
-  font-weight: 600;
-  color: var(--text-color);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   padding-left: 0;
 }
 
 .outline-item.level-2 {
-  padding-left: 16px;
+  padding-left: var(--spacing-lg);
 }
 
 .outline-item.level-3 {
-  padding-left: 32px;
-  font-size: 12px;
+  padding-left: var(--spacing-2xl);
+  font-size: var(--font-size-sm);
 }
 
 .sources-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 4px;
-  margin-top: 8px;
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-sm);
   align-items: center;
 }
 
 .sources-label {
-  font-size: 11px;
+  font-size: var(--font-size-xs);
   color: var(--text-tertiary);
 }
 
 .source-item {
-  font-size: 11px;
-  padding: 1px 6px;
+  font-size: var(--font-size-xs);
+  padding: 1px var(--spacing-sm);
   background: var(--bg-tertiary);
   color: var(--text-secondary);
   border-radius: var(--radius-sm);
@@ -349,17 +354,17 @@ defineEmits<{
 .issues-list {
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: var(--spacing-sm);
 }
 
 .issue-item {
   display: flex;
   align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
 }
 
 .issue-original {
@@ -368,125 +373,125 @@ defineEmits<{
 }
 
 .issue-corrected {
-  color: #16a34a;
+  color: var(--ws-success);
 }
 
 .issue-type {
-  background: var(--primary-color);
-  color: #fff;
-  padding: 1px 6px;
+  background: var(--text-primary);
+  color: var(--bg-primary);
+  padding: 1px var(--spacing-sm);
   border-radius: var(--radius-sm);
-  font-size: 10px;
+  font-size: var(--font-size-xs);
   margin-left: auto;
 }
 
 .slide-item {
-  margin-bottom: 8px;
-  padding: 8px;
+  margin-bottom: var(--spacing-sm);
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
 }
 
 .slide-item strong {
-  font-size: 13px;
-  color: var(--primary-color);
+  font-size: var(--font-size-sm);
+  color: var(--text-primary);
 }
 
 .slide-item ul {
-  margin: 4px 0 0;
-  padding-left: 16px;
-  font-size: 12px;
+  margin: var(--spacing-xs) 0 0;
+  padding-left: var(--spacing-lg);
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .improved-content {
-  padding: 10px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 
 .improved-content p {
-  margin: 0 0 8px;
+  margin: 0 0 var(--spacing-sm);
 }
 
 .notes-text {
-  padding: 10px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: var(--font-size-sm);
+  line-height: 1.5;
   color: var(--text-secondary);
 }
 
 .design-item {
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .design-item strong {
-  color: var(--primary-color);
+  color: var(--text-primary);
 }
 
 .formula-item {
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  margin-bottom: 6px;
+  margin-bottom: var(--spacing-sm);
 }
 
 .formula-code {
   display: block;
-  color: #16a34a;
-  font-family: monospace;
-  font-size: 13px;
-  margin-bottom: 4px;
+  color: var(--ws-success);
+  font-family: var(--font-code);
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-xs);
 }
 
 .formula-desc {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
   margin: 0;
 }
 
 .chart-suggestion {
-  padding: 10px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   border-radius: var(--radius-lg);
 }
 
 .chart-type-badge {
   display: inline-block;
-  padding: 3px 10px;
-  background: var(--primary-color);
-  color: #fff;
+  padding: var(--spacing-xs) var(--spacing-md);
+  background: var(--text-primary);
+  color: var(--bg-primary);
   border-radius: var(--radius-full);
-  font-size: 12px;
-  margin-bottom: 6px;
+  font-size: var(--font-size-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
 .clean-op {
   display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 6px 8px;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  margin-bottom: 4px;
-  font-size: 12px;
+  margin-bottom: var(--spacing-xs);
+  font-size: var(--font-size-sm);
 }
 
 .op-type {
-  background: #d97706;
-  color: #fff;
-  padding: 1px 6px;
+  background: var(--ws-warning);
+  color: var(--bg-primary);
+  padding: 1px var(--spacing-sm);
   border-radius: var(--radius-sm);
-  font-size: 10px;
-  font-weight: 600;
+  font-size: var(--font-size-xs);
+  font-weight: var(--font-weight-semibold);
 }
 
 .op-desc {
@@ -496,15 +501,15 @@ defineEmits<{
 
 .tag-list {
   display: flex;
-  gap: 4px;
+  gap: var(--spacing-xs);
   flex-wrap: wrap;
 }
 
 .tag {
-  font-size: 10px;
-  padding: 1px 6px;
+  font-size: var(--font-size-xs);
+  padding: 1px var(--spacing-sm);
   background: var(--bg-tertiary);
-  color: var(--primary-color);
+  color: var(--text-primary);
   border-radius: var(--radius-sm);
 }
 
@@ -517,30 +522,30 @@ defineEmits<{
 }
 
 .link-item {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
-  padding: 6px 8px;
+  padding: var(--spacing-sm) var(--spacing-md);
   background: var(--bg-tertiary);
   border-radius: var(--radius-md);
-  margin-bottom: 4px;
+  margin-bottom: var(--spacing-xs);
 }
 
 .code-block {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   line-height: 1.5;
-  color: var(--primary-color);
+  color: var(--text-primary);
   background: var(--bg-tertiary);
-  padding: 10px;
+  padding: var(--spacing-sm);
   border-radius: var(--radius-lg);
   overflow-x: auto;
-  font-family: monospace;
+  font-family: var(--font-code);
   white-space: pre-wrap;
   margin: 0;
 }
 
 .issue-sev {
-  font-size: 10px;
-  padding: 1px 6px;
+  font-size: var(--font-size-xs);
+  padding: 1px var(--spacing-sm);
   border-radius: var(--radius-sm);
 }
 
@@ -550,8 +555,8 @@ defineEmits<{
 }
 
 .issue-sev.warning {
-  background: rgba(217, 119, 6, 0.15);
-  color: #d97706;
+  background: rgba(255, 152, 0, 0.15);
+  color: var(--ws-warning);
 }
 
 .issue-sev.info {
@@ -560,56 +565,64 @@ defineEmits<{
 }
 
 .issue-desc {
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   color: var(--text-secondary);
 }
 
 .review-score {
-  margin-top: 8px;
-  font-size: 16px;
-  font-weight: 600;
-  color: var(--primary-color);
+  margin-top: var(--spacing-sm);
+  font-size: var(--font-size-md);
+  font-weight: var(--font-weight-semibold);
+  color: var(--text-primary);
   text-align: center;
 }
 
 .ai-actions {
   display: flex;
-  gap: 8px;
-  margin-top: 12px;
+  gap: var(--spacing-sm);
+  margin-top: var(--spacing-md);
 }
 
 .apply-btn {
   flex: 1;
-  padding: 8px;
-  background: var(--primary-color);
-  color: #fff;
+  padding: var(--spacing-sm);
+  background: var(--text-primary);
+  color: var(--bg-primary);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 12px;
-  font-weight: 500;
-  transition: background var(--transition-fast);
+  font-size: var(--font-size-sm);
+  font-weight: var(--font-weight-medium);
+  transition: all var(--transition-fast);
 }
 
 .apply-btn:hover {
   background: var(--primary-hover);
 }
 
+.apply-btn:active {
+  transform: scale(0.97);
+}
+
 .discard-btn {
   flex: 1;
-  padding: 8px;
+  padding: var(--spacing-sm);
   background: var(--bg-tertiary);
   color: var(--text-tertiary);
   border: none;
   border-radius: var(--radius-md);
   cursor: pointer;
-  font-size: 12px;
+  font-size: var(--font-size-sm);
   transition: all var(--transition-fast);
 }
 
 .discard-btn:hover {
   background: var(--border-color);
-  color: var(--text-color);
+  color: var(--text-primary);
+}
+
+.discard-btn:active {
+  transform: scale(0.97);
 }
 
 .ai-empty {
@@ -618,6 +631,6 @@ defineEmits<{
   justify-content: center;
   height: 100%;
   color: var(--text-tertiary);
-  font-size: 13px;
+  font-size: var(--font-size-sm);
 }
 </style>

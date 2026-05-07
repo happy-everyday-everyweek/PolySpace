@@ -1,6 +1,10 @@
 from app.core.tools.browser_tool import BrowserTool
+from app.core.tools.cua_screen_tool import CuaScreenTool
 from app.core.tools.desktop_tool import DesktopTool
 from app.core.tools.file_tool import FileTool
+from app.core.tools.nocobase_tool import NocoBaseTool
+from app.core.tools.open_design_tool import OpenDesignTool
+from app.core.tools.opencli_web_tool import OpenCLIWebTool
 from app.core.tools.pdf_tool import PDFTool
 from app.core.tools.scheduler_tool import SchedulerTool
 from app.core.tools.search_tool import SearchTool
@@ -16,4 +20,8 @@ __all__ = [
     "SchedulerTool",
     "PDFTool",
     "VideoEditorTool",
+    "CuaScreenTool",
+    "OpenCLIWebTool",
+    "NocoBaseTool",
+    "OpenDesignTool",
 ]

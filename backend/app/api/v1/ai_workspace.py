@@ -429,6 +429,22 @@ async def ai_code_assist(req: CodeAssistRequest):
         return _handle_ai_error("code_assist", e)
 
 
+@router.post("/dev/assist")
+async def ai_dev_assist(req: CodeAssistRequest):
+    try:
+        return await _get_service().ai_dev_assist(req.action, req.params)
+    except Exception as e:
+        return _handle_ai_error("dev_assist", e)
+
+
+@router.post("/design/assist")
+async def ai_design_assist(req: CodeAssistRequest):
+    try:
+        return await _get_service().ai_design_assist(req.action, req.params)
+    except Exception as e:
+        return _handle_ai_error("design_assist", e)
+
+
 @router.post("/finance/assist")
 async def ai_finance_assist(req: FinanceAssistRequest):
     try:
@@ -599,3 +615,95 @@ async def video_process(req: VideoProcessRequest):
             return {"error": f"Unknown action: {req.action}"}
     except Exception as e:
         return _handle_ai_error("video_process", e)
+
+
+class DesignExportRequest(BaseModel):
+    project_id: str
+    export_format: str = "html"
+    target_app: Optional[str] = None
+
+
+@router.post("/design/export")
+async def design_export(req: DesignExportRequest):
+    try:
+        from app.core.tools.open_design_tool import OpenDesignProcessManager
+
+        manager = OpenDesignProcessManager.get_instance()
+        if not manager.is_running():
+            start_result = await manager.ensure_running()
+            if start_result.get("status") not in ("running", "already_running"):
+                return {"error": "Design engine not available", "detail": start_result}
+
+        if req.export_format == "html":
+            result = await manager.api_request("GET", f"/api/projects/{req.project_id}/archive")
+            return {"format": "html", "data": result}
+        elif req.export_format == "pdf":
+            return {
+                "format": "pdf",
+                "method": "Use browser print on the HTML artifact",
+                "project_id": req.project_id,
+            }
+        elif req.export_format == "ppt":
+            return {
+                "format": "ppt",
+                "target": "ppt_app",
+                "project_id": req.project_id,
+                "message": "Design exported to PPT application for further editing",
+            }
+        elif req.export_format == "dev":
+            return {
+                "format": "dev",
+                "target": "dev_app",
+                "project_id": req.project_id,
+                "message": "Design exported to Dev application - AI will enhance with logic and backend",
+            }
+        else:
+            return {"error": f"Unsupported export format: {req.export_format}"}
+    except Exception as e:
+        return _handle_ai_error("design_export", e)
+
+
+@router.post("/design/daemon/start")
+async def design_daemon_start():
+    try:
+        from app.core.tools.open_design_tool import OpenDesignProcessManager
+
+        manager = OpenDesignProcessManager.get_instance()
+        result = await manager.start()
+        return result
+    except Exception as e:
+        return _handle_ai_error("design_daemon_start", e)
+
+
+@router.get("/design/daemon/status")
+async def design_daemon_status():
+    try:
+        from app.core.tools.open_design_tool import OpenDesignProcessManager
+
+        manager = OpenDesignProcessManager.get_instance()
+        return manager.get_status()
+    except Exception as e:
+        return _handle_ai_error("design_daemon_status", e)
+
+
+@router.post("/dev/daemon/start")
+async def dev_daemon_start():
+    try:
+        from app.core.tools.nocobase_tool import NocoBaseProcessManager
+
+        manager = NocoBaseProcessManager.get_instance()
+        result = await manager.start()
+        return result
+    except Exception as e:
+        return _handle_ai_error("dev_daemon_start", e)
+
+
+@router.get("/dev/daemon/status")
+async def dev_daemon_status():
+    try:
+        from app.core.tools.nocobase_tool import NocoBaseProcessManager
+
+        manager = NocoBaseProcessManager.get_instance()
+        return manager.get_status()
+    except Exception as e:
+        return _handle_ai_error("dev_daemon_status", e)

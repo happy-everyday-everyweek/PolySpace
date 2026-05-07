@@ -144,6 +144,42 @@ Data Layer
 
 ## Tool System
 
+### Tool Isolation Architecture (CRITICAL)
+
+PolySpace has two distinct tool scopes that MUST be kept separate:
+
+| Module | Tool Scope | Purpose |
+|--------|-----------|---------|
+| **Interaction Module** (ChatService) | Only 3 interaction tools: `read_file`, `search`, `execute_task` | Delegates work to ExecutionAgent via `execute_task` |
+| **Execution Module** (ExecutionAgent) | All tools EXCEPT `execute_task`, `read_file`, `search` | Performs actual operations (browser, screen, shell, etc.) |
+
+**Why this separation exists:**
+- Interaction module acts as a "dispatcher" - it converses with the user and delegates tasks
+- Execution module acts as a "worker" - it performs actual operations
+- `execute_task` is excluded from ExecutionAgent to prevent recursive task creation
+- `read_file` and `search` are excluded from ExecutionAgent because they are interaction-level tools
+
+**Implementation:**
+- `ChatService.process_message_stream()`: Creates `interaction_tools` list with only 3 tools, passes to LLM via `tools` parameter
+- `ExecutionAgent.think()`: Uses `excluded_tools = {"execute_task", "read_file", "search"}` to filter global `tool_registry`
+- Both modules use `self._tools.call_tool()` (global ToolRegistry) for actual execution, but only expose their respective tool definitions to the LLM
+
+**Rule: NEVER give the interaction module access to operational tools (browser, screen_operation, etc.) directly. Always delegate through `execute_task`.**
+
+### Tool Registration
+
+All tools are registered at startup via `_register_all_tools()` in `dependencies.py`:
+
+1. 3 interaction tools: `read_file`, `search`, `execute_task`
+2. 7 core tools: `browser`, `screen_operation`, `shell`, `search`, `scheduler`, `file`, `pdf`
+3. Bulk registrars: `register_extension_tools()`, `register_workspace_tools()`, `register_enhanced_tools()`, `register_cross_app_tools()`
+
+**Rule: When adding a new tool, it MUST be registered in `_register_all_tools()` in `dependencies.py`. Otherwise it will not be available.**
+
+### Tool Choice
+
+`tool_choice: "auto"` is set in `LLMGateway.acompletion()` and `acompletion_stream()` whenever `tools` parameter is provided. This is required for LLMs to actually call tools.
+
 ### State Machine
 Each tool follows: `inactive → activating → active → calling → hibernate → active`
 
@@ -158,6 +194,31 @@ When a tool is not available locally, the registry routes it to a connected devi
 
 ### Unified Tool Spec
 `UnifiedToolSpec` provides a unified tool description format compatible with OpenAI Function Calling and MCP protocol.
+
+### SSE Stream Chunk Types
+
+The chat stream emits the following chunk types in order:
+
+| Type | When | Data |
+|------|------|------|
+| `emotion` | After emotion perception | HeartFlow emotion context |
+| `inner_voice` | After inner voice generation | text + visibility |
+| `action` | After PFC decision | action_type + reason |
+| `content` | Per LLM token output | content (single token) |
+| `tool_call` | Before tool execution | id + name + arguments |
+| `tool_result` | After tool execution | tool_call_id + name + result + executed |
+| `done` | After completion | session_id + tool_calls (with results) + cards + reflection |
+
+### System Prompt Architecture
+
+Two separate prompt builders:
+
+| Builder | Module | Key Characteristics |
+|---------|--------|-------------------|
+| `build_system_prompt()` | Interaction (ChatService) | Includes persona, emotion, inner voice, relationship, expression habits. Ends with tool instructions + "must call tools" rule |
+| `build_execution_prompt()` | Execution (ExecutionAgent) | No emotion/persona. Focused on task completion. Tool instructions at the end with "must use tools" emphasis |
+
+**Rule: Tool usage instructions MUST be placed at the END of the system prompt. LLMs weight later instructions more heavily. If "act like a human" comes after tool instructions, the LLM will prefer text replies over tool calls.**
 
 ## Coordination Module (Proactive Services)
 
@@ -309,6 +370,11 @@ Defined in `backend/policies/POLICIES.yaml`:
 - Dependencies and cache directories must be on D: drive
 - Audit: all operations auto-audited, SHA-256 checksums for integrity
 - Personality pipeline: Perceive → Think → Feel → Express (4-stage processing)
+- Tool isolation: Interaction module sees only 3 tools (read_file, search, execute_task); Execution module sees all others but NOT execute_task
+- Tool registration: All tools MUST be registered in `_register_all_tools()` in `dependencies.py`
+- Tool choice: `tool_choice: "auto"` must be set when tools are provided to LLM
+- System prompt order: Tool usage instructions MUST be at the END of system prompts, after persona/emotion sections
+- SSE chunks: `tool_call` and `tool_result` chunks are emitted during tool execution for real-time UI feedback
 
 ## UI Design Specification (xAI Minimalist Style)
 

@@ -178,8 +178,17 @@ class AIWorkspaceService:
                 "link_suggest": "Suggest related notes to link. Return JSON: {suggestions: [{title, reason, relevance}]}.",
                 "generate": "Generate a structured note from the given content or conversation. Return JSON: {title, content, tags: []}.",
                 "refine": "Refine and improve the note content. Return JSON: {refined_content, changes: [{section, improvement}]}.",
+                "polish": "Polish the note content for better readability and flow. Keep the original meaning. Return JSON: {polished_content}.",
+                "correct": "Correct grammar, spelling, and punctuation errors in the note. Return JSON: {corrected_content, issues: [{original, corrected, type}]}.",
+                "sprout": "Analyze the note deeply and generate a sprout report with structured sections. Each section should have a title, detailed content expanding on the original note, and an 'aha moment' insight. Return JSON: {title, sections: [{number, title, content, aha_moment}]}.",
+                "extract_url": "Extract and parse content from the given URL. Generate a structured note with title, summary, key points, and tags. Return JSON: {title, structured_content, summary, key_points: [], tags: []}.",
+                "ocr_note": "Recognize and extract text from the image description. Generate a structured note. Return JSON: {title, content, tags: []}.",
+                "voice_correct": "Correct transcription errors from voice input. Fix punctuation, grammar, and unclear words. Return JSON: {corrected_content, changes: [{original, corrected}]}.",
+                "outline": "Generate a structured outline for the note content. Return JSON: {outline: [{level, text}], title}.",
+                "template": "Generate a note template based on the given topic or type. Return JSON: {title, content, tags: []}.",
+                "organize": "Organize and restructure the note content logically. Return JSON: {organized_content, structure: [{section, items}]}.",
             },
-            "default_prompt": "Assist with note-taking.",
+            "default_prompt": "Assist with note-taking. Return JSON with the result.",
             "category": "MEMORY",
             "default_return": {"result": ""},
         },
@@ -236,6 +245,39 @@ class AIWorkspaceService:
                 "debug": "Help debug the code issue. Return JSON: {diagnosis, root_cause, fix, prevention}.",
             },
             "default_prompt": "Assist with code editing and development.",
+            "category": "PLANNING",
+            "default_return": {"result": ""},
+        },
+        "dev": {
+            "action_prompts": {
+                "create_app": "Generate a complete application scaffold from the user's description. Return JSON: {files: [{path, content}], summary, dependencies, uses_polyspace_plugins, publish_targets}.",
+                "add_feature": "Add a feature to the existing application. Return JSON: {files: [{path, content, action}], summary, dependencies}.",
+                "add_plugin": "Integrate a PolySpace platform plugin (cross-device-sync, ai-capability, cloud-storage, notification, user-identity). Return JSON: {files: [{path, content, action}], plugin_id, summary, publish_restriction}.",
+                "generate_backend": "Generate backend API endpoints for the application. Return JSON: {files: [{path, content}], api_routes: [{method, path, description}], summary}.",
+                "generate_ui": "Generate UI components for the application. Return JSON: {files: [{path, content}], components: [{name, description}], summary}.",
+                "deploy_check": "Check if the application is ready for deployment. Return JSON: {ready, issues: [{severity, description, fix}], uses_polyspace_plugins, available_targets}.",
+                "explain_code": "Explain the application code in plain language for non-developers. Return JSON: {explanation, architecture, data_flow, key_components}.",
+                "fix_error": "Fix an error in the application. Return JSON: {diagnosis, fix, files: [{path, content, action}], prevention}.",
+            },
+            "default_prompt": "Assist with application development for the PolySpace Dev App. Help non-technical users build and deploy applications.",
+            "category": "PLANNING",
+            "default_return": {"result": ""},
+        },
+        "design": {
+            "action_prompts": {
+                "generate": "Generate a design prototype based on the description. Return JSON: {html, css, summary, skill_used, design_system}.",
+                "iterate": "Iterate on the existing design based on feedback. Return JSON: {html, css, changes: [{description}], summary}.",
+                "change_style": "Change the visual style or design system. Return JSON: {html, css, style_changes, summary}.",
+                "add_section": "Add a new section to the design. Return JSON: {html, css, section_added, summary}.",
+                "remove_section": "Remove a section from the design. Return JSON: {html, css, section_removed, summary}.",
+                "adjust_layout": "Adjust the layout of the design. Return JSON: {html, css, layout_changes, summary}.",
+                "change_colors": "Change the color scheme. Return JSON: {html, css, color_changes, summary}.",
+                "change_typography": "Change the typography. Return JSON: {html, css, typography_changes, summary}.",
+                "export_ppt": "Convert the design to a format suitable for the PPT application. Return JSON: {slides: [{title, content, layout}], summary}.",
+                "export_dev": "Convert the design to a format suitable for the Dev application, with AI-enhanced logic and backend. Return JSON: {files: [{path, content}], summary, ai_enhancements}.",
+                "critique": "Provide a five-dimension design critique. Return JSON: {scores: {philosophy, hierarchy, execution, specificity, restraint}, issues, suggestions}.",
+            },
+            "default_prompt": "Assist with AI-driven design for the PolySpace Design App. Generate and iterate on visual designs.",
             "category": "PLANNING",
             "default_return": {"result": ""},
         },
@@ -426,6 +468,12 @@ class AIWorkspaceService:
 
     async def ai_code_assist(self, action: str, params: dict) -> dict:
         return await self._execute_action_task("code", action, json.dumps(params, ensure_ascii=False))
+
+    async def ai_dev_assist(self, action: str, params: dict) -> dict:
+        return await self._execute_action_task("dev", action, json.dumps(params, ensure_ascii=False))
+
+    async def ai_design_assist(self, action: str, params: dict) -> dict:
+        return await self._execute_action_task("design", action, json.dumps(params, ensure_ascii=False))
 
     async def ai_finance_assist(self, action: str, params: dict) -> dict:
         return await self._execute_action_task("finance", action, json.dumps(params, ensure_ascii=False))

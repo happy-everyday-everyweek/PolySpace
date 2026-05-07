@@ -15,6 +15,7 @@ dependencies = [
     "litellm>=1.50",
     "pyyaml>=6.0",
     "python-multipart>=0.0.9",
+    "aiofiles>=24.1.0",
     "websockets>=12.0",
     "cryptography>=42.0",
     "pyautogui",

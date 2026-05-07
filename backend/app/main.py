@@ -1,8 +1,11 @@
 import logging
+import os
 from contextlib import asynccontextmanager
+from pathlib import Path
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles
 
 from app.api.v1 import (
     ai_coordination,
@@ -20,6 +23,7 @@ from app.api.v1 import (
     im,
     inference,
     kanban,
+    llm_proxy,
     marketplace,
     models,
     overview,
@@ -127,9 +131,22 @@ app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(marketplace.router, prefix="/api/v1/marketplace", tags=["marketplace"])
 app.include_router(pdf.router, prefix="/api/v1/pdf", tags=["pdf"])
 app.include_router(doc_conversion.router, prefix="/api/v1/documents", tags=["doc-conversion"])
+app.include_router(llm_proxy.router, tags=["llm-proxy"])
 app.include_router(tasks.router, prefix="/api/v1/tasks", tags=["tasks"])
 app.include_router(chat_ws.router, prefix="/ws", tags=["websocket"])
 app.include_router(metrics_router, prefix="/metrics", tags=["metrics"])
+
+FRONTEND_DIST_DIR = os.environ.get("POLYSPACE_FRONTEND_DIR", "")
+if FRONTEND_DIST_DIR and os.path.isdir(FRONTEND_DIST_DIR):
+    app.mount("/", StaticFiles(directory=FRONTEND_DIST_DIR, html=True), name="frontend")
+else:
+    for candidate in [
+        os.path.join(os.path.dirname(__file__), "..", "..", "frontend", "dist"),
+        os.path.join(os.path.dirname(__file__), "..", "..", "..", "frontend", "dist"),
+    ]:
+        if os.path.isdir(candidate):
+            app.mount("/", StaticFiles(directory=candidate, html=True), name="frontend")
+            break
 
 
 @app.get("/health")

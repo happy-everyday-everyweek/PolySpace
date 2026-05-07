@@ -171,7 +171,6 @@ class ChatService:
             ReadFileTool,
             SearchAggregateTool,
         )
-        from app.core.tool.registry import ToolRegistry as _ToolRegistry
 
         persona_section = self._persona.get_persona_prompt_section()
         memory_context = "\n".join(m.content for m in memories) if memories else ""
@@ -295,21 +294,26 @@ class ChatService:
         persona_modifiers = self._persona.get_expression_modifiers()
         self._expression.configure_from_persona(persona_modifiers)
 
-        interaction_registry = _ToolRegistry()
+        interaction_tools = []
         for tool_cls in (ReadFileTool, SearchAggregateTool, ExecuteTaskTool):
             try:
-                interaction_registry.register(tool_cls())
+                interaction_tools.append(tool_cls())
             except Exception as reg_err:
                 logger.warning(
-                    "Failed to register tool %s: %s",
+                    "Failed to create tool %s: %s",
                     tool_cls.__name__,
                     reg_err,
                 )
-        tools = interaction_registry.get_definitions()
-        tool_names = [
-            t.get("function", {}).get("name") for t in tools
-        ] if tools else []
-        logger.info("[Stream] Tools available: %s", tool_names or "None")
+
+        interaction_tool_names = set(t.name for t in interaction_tools)
+        for t in interaction_tools:
+            existing = self._tools.get(t.name)
+            if not existing:
+                self._tools.register(t)
+
+        tools = [t.get_definition() for t in interaction_tools]
+        tool_names = list(interaction_tool_names)
+        logger.info("[Stream] Interaction tools: %s", tool_names or "None")
 
         if tools and not history_messages:
             llm_messages.insert(1, {"role": "user", "content": "帮我写一份周报"})
@@ -426,7 +430,7 @@ class ChatService:
                     action_result, policy_msg = self._policies.evaluate(tc_info["name"])
 
                     if action_result.value == "allow":
-                        result = await interaction_registry.call_tool(tc_info["name"], **args)
+                        result = await self._tools.call_tool(tc_info["name"], **args)
                         executed_tool_calls.append({
                             "id": tc_info["id"],
                             "name": tc_info["name"],
