@@ -134,3 +134,75 @@ class TestExceptions:
         assert err.code == "SERVICE_UNAVAILABLE"
         assert err.status_code == 503
         assert err.service == "chat_service"
+
+
+class TestSafeEvaluator:
+    def setup_method(self):
+        from app.core.tool.workspace_tools import safe_eval
+        self.safe_eval = safe_eval
+
+    def test_basic_arithmetic(self):
+        assert self.safe_eval("2 + 3") == 5
+        assert self.safe_eval("10 - 4") == 6
+        assert self.safe_eval("3 * 4") == 12
+        assert self.safe_eval("15 / 3") == 5.0
+        assert self.safe_eval("10 % 3") == 1
+
+    def test_order_of_operations(self):
+        assert self.safe_eval("2 + 3 * 4") == 14
+        assert self.safe_eval("(2 + 3) * 4") == 20
+
+    def test_power_operator(self):
+        assert self.safe_eval("2 ** 3") == 8
+        assert self.safe_eval("2 ^ 3") == 8
+        assert self.safe_eval("10 ** 2") == 100
+
+    def test_unary_operators(self):
+        assert self.safe_eval("-5") == -5
+        assert self.safe_eval("--5") == 5
+        assert self.safe_eval("-2 + 3") == 1
+
+    def test_comparisons(self):
+        assert self.safe_eval("5 > 3") == True
+        assert self.safe_eval("5 < 3") == False
+        assert self.safe_eval("10 >= 10") == True
+        assert self.safe_eval("3 <= 2") == False
+        assert self.safe_eval("5 == 5") == True
+        assert self.safe_eval("5 != 3") == True
+
+    def test_conditional_expression(self):
+        assert self.safe_eval("1 if 5 > 3 else 0") == 1
+        assert self.safe_eval("1 if 3 > 5 else 0") == 0
+
+    def test_empty_expression_raises(self):
+        import pytest
+        with pytest.raises(ValueError):
+            self.safe_eval("")
+        with pytest.raises(ValueError):
+            self.safe_eval("   ")
+
+    def test_malicious_code_injection_blocked(self):
+        import pytest
+        malicious_exprs = [
+            "__import__('os').system('ls')",
+            "().__class__.__bases__[0].__subclasses__()",
+            "open('/etc/passwd').read()",
+            "__builtins__",
+            "[].__class__.__base__",
+            "exec('print(1)')",
+            "eval('1+1')",
+            "import sys",
+            "from os import system",
+            "os.listdir('.')",
+        ]
+        for expr in malicious_exprs:
+            with pytest.raises(Exception):
+                self.safe_eval(expr)
+
+    def test_whitespace_handling(self):
+        assert self.safe_eval("  2 + 3  ") == 5
+        assert self.safe_eval("\t4 * 5\t") == 20
+
+    def test_float_numbers(self):
+        assert self.safe_eval("3.14 + 2.86") == 6.0
+        assert self.safe_eval("10.5 / 2") == 5.25

@@ -1,9 +1,138 @@
+import ast
 import logging
+import operator
 from typing import Any
 
 from app.core.tool.base import BaseTool
 
 logger = logging.getLogger(__name__)
+
+BINARY_OPERATORS = {
+    ast.Add: operator.add,
+    ast.Sub: operator.sub,
+    ast.Mult: operator.mul,
+    ast.Div: operator.truediv,
+    ast.Mod: operator.mod,
+    ast.Pow: operator.pow,
+    ast.USub: operator.neg,
+    ast.UAdd: operator.pos,
+}
+
+COMPARE_OPERATORS = {
+    ast.Lt: operator.lt,
+    ast.LtE: operator.le,
+    ast.Gt: operator.gt,
+    ast.GtE: operator.ge,
+    ast.Eq: operator.eq,
+    ast.NotEq: operator.ne,
+}
+
+
+class SafeEvaluator(ast.NodeVisitor):
+    def __init__(self):
+        self._result = None
+
+    def visit_Constant(self, node):
+        if isinstance(node.value, (int, float)):
+            self._result = node.value
+        elif isinstance(node.value, str):
+            raise ValueError(f"Strings are not allowed: {node.value[:20]}")
+        return self._result
+
+    def visit_Name(self, node):
+        raise ValueError(f"Names are not allowed: {node.id}")
+
+    def visit_Attribute(self, node):
+        raise ValueError("Attribute access is not allowed")
+
+    def visit_Subscript(self, node):
+        raise ValueError("Subscript access is not allowed")
+
+    def visit_Call(self, node):
+        raise ValueError("Function calls are not allowed")
+
+    def visit_Lambda(self, node):
+        raise ValueError("Lambda expressions are not allowed")
+
+    def visit_Expression(self, node):
+        return self.visit(node.body)
+
+    def visit_Module(self, node):
+        if len(node.body) == 1:
+            return self.visit(node.body[0])
+        raise ValueError("Invalid expression")
+
+    def visit_Num(self, node):
+        self._result = node.n
+        return self._result
+
+    def visit_BinOp(self, node):
+        left = self.visit(node.left)
+        right = self.visit(node.right)
+        op_type = type(node.op)
+        if op_type not in BINARY_OPERATORS:
+            raise ValueError(f"Unsupported binary operator: {op_type.__name__}")
+        self._result = BINARY_OPERATORS[op_type](left, right)
+        return self._result
+
+    def visit_UnaryOp(self, node):
+        operand = self.visit(node.operand)
+        op_type = type(node.op)
+        if op_type not in BINARY_OPERATORS:
+            raise ValueError(f"Unsupported unary operator: {op_type.__name__}")
+        self._result = BINARY_OPERATORS[op_type](operand)
+        return self._result
+
+    def visit_BoolOp(self, node):
+        values = [self.visit(v) for v in node.values]
+        if isinstance(node.op, ast.And):
+            self._result = all(values)
+        elif isinstance(node.op, ast.Or):
+            self._result = any(values)
+        return self._result
+
+    def visit_Compare(self, node):
+        left = self.visit(node.left)
+        for op, comparator in zip(node.ops, node.comparators):
+            op_type = type(op)
+            right = self.visit(comparator)
+            if op_type not in COMPARE_OPERATORS:
+                raise ValueError(f"Unsupported comparison: {op_type.__name__}")
+            if not COMPARE_OPERATORS[op_type](left, right):
+                self._result = False
+                return self._result
+            left = right
+        self._result = True
+        return self._result
+
+    def visit_IfExp(self, node):
+        test = self.visit(node.test)
+        if test:
+            self._result = self.visit(node.body)
+        else:
+            self._result = self.visit(node.orelse)
+        return self._result
+
+
+def safe_eval(expression: str) -> float:
+    allowed_chars = set("0123456789+-*/.()%^ \t<>=!")
+    sanitized = "".join(c for c in expression if c in allowed_chars or c.isalnum())
+    sanitized = sanitized.replace("^", "**")
+    sanitized = sanitized.strip()
+
+    if not sanitized:
+        raise ValueError("Empty expression")
+
+    try:
+        tree = ast.parse(sanitized, mode="eval")
+    except SyntaxError as e:
+        raise ValueError(f"Malformed expression: {e}")
+
+    visitor = SafeEvaluator()
+    visitor.visit(tree)
+    if visitor._result is None:
+        raise ValueError("Could not evaluate expression")
+    return visitor._result
 
 
 class DocumentTool(BaseTool):
@@ -1179,10 +1308,7 @@ class CalculatorTool(BaseTool):
         try:
             if action == "evaluate":
                 expr = kwargs.get("expression", "0")
-                allowed_chars = set("0123456789+-*/.()%^ ")
-                sanitized = "".join(c for c in expr if c in allowed_chars or c.isalpha())
-                sanitized = sanitized.replace("^", "**")
-                result = eval(sanitized, {"__builtins__": {}}, {})
+                result = safe_eval(expr)
                 return {"result": result, "expression": expr}
             elif action == "convert_unit":
                 from app.core.llm.dispatcher import ModelDispatcher
