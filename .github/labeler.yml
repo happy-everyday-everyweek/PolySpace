@@ -1,0 +1,46 @@
+backend:
+  - backend/**/*
+
+frontend:
+  - frontend/**/*
+
+android:
+  - android/**/*
+
+desktop:
+  - desktop/**/*
+
+docker:
+  - Dockerfile
+  - backend/Dockerfile
+  - .dockerignore
+  - backend/.dockerignore
+
+ci-cd:
+  - .github/workflows/**/*
+
+documentation:
+  - "**/*.md"
+  - docs/**/*
+
+dependencies:
+  - backend/pyproject.toml
+  - frontend/package.json
+  - frontend/package-lock.json
+  - android/app/build.gradle.kts
+  - android/build.gradle.kts
+
+security:
+  - backend/policies/**/*
+  - backend/app/core/safety/**/*
+
+testing:
+  - backend/tests/**/*
+  - android/app/src/test/**/*
+  - android/app/src/androidTest/**/*
+
+configuration:
+  - backend/app/config.py
+  - backend/app/core/config/**/*
+  - frontend/tsconfig.json
+  - frontend/vite.config.ts
