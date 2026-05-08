@@ -209,21 +209,24 @@ object ScreenOperationTool : NativeTool {
         val file = File(context.cacheDir, "screen_op_${System.currentTimeMillis()}.jpg")
         val success = AccessibilityBridge.takeScreenshot(file.absolutePath, "jpg")
         if (!success || !file.exists()) return null
+        var bitmap: android.graphics.Bitmap? = null
+        var scaled: Bitmap? = null
+        var stream: ByteArrayOutputStream? = null
         return try {
-            val bitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath) ?: return null
-            val scaled = scaleBitmap(bitmap)
-            val stream = ByteArrayOutputStream()
+            bitmap = android.graphics.BitmapFactory.decodeFile(file.absolutePath) ?: return null
+            scaled = scaleBitmap(bitmap)
+            stream = ByteArrayOutputStream()
             scaled.compress(Bitmap.CompressFormat.JPEG, SCREENSHOT_QUALITY, stream)
             val base64 = Base64.encodeToString(stream.toByteArray(), Base64.NO_WRAP)
-            stream.close()
-            if (scaled != bitmap) scaled.recycle()
-            bitmap.recycle()
-            file.delete()
             base64
         } catch (e: Exception) {
             Log.e(TAG, "Screenshot base64 failed", e)
-            file.delete()
             null
+        } finally {
+            try { stream?.close() } catch (_: Exception) {}
+            if (scaled != null && scaled !== bitmap) scaled.recycle()
+            bitmap?.recycle()
+            file.delete()
         }
     }
 

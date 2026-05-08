@@ -6,6 +6,8 @@ import android.view.accessibility.AccessibilityEvent
 import com.polyspace.mobile.service.PolySpaceAccessibilityService
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
+import java.util.concurrent.CountDownLatch
+import java.util.concurrent.TimeUnit
 
 data class LightweightAccessibilityEvent(
     val eventType: Int,
@@ -72,12 +74,11 @@ object AccessibilityBridge {
         return service?.setTextOnNode(nodeId, text) ?: false
     }
 
-    private var screenshotResult: Boolean = false
-
     fun takeScreenshot(path: String, format: String): Boolean {
         return try {
             val svc = service ?: return false
-            screenshotResult = false
+            val latch = CountDownLatch(1)
+            val resultHolder = booleanArrayOf(false)
             svc.takeScreenshot(
                 android.view.Display.DEFAULT_DISPLAY,
                 { runnable -> runnable.run() },
@@ -87,7 +88,7 @@ object AccessibilityBridge {
                             val bitmap = android.graphics.Bitmap.wrapHardwareBuffer(
                                 screenshot.hardwareBuffer,
                                 screenshot.colorSpace
-                            ) ?: return
+                            ) ?: run { latch.countDown(); return }
                             val softwareBitmap = bitmap.copy(
                                 android.graphics.Bitmap.Config.ARGB_8888,
                                 false
@@ -101,21 +102,23 @@ object AccessibilityBridge {
                                     }
                                     softwareBitmap.compress(compressFormat, 90, fos)
                                 }
-                                screenshotResult = true
+                                resultHolder[0] = true
                                 softwareBitmap.recycle()
                             }
                         } finally {
                             screenshot.hardwareBuffer.close()
+                            latch.countDown()
                         }
                     }
 
                     override fun onFailure(errorCode: Int) {
-                        screenshotResult = false
+                        resultHolder[0] = false
+                        latch.countDown()
                     }
                 }
             )
-            Thread.sleep(1000)
-            screenshotResult
+            latch.await(3, TimeUnit.SECONDS)
+            resultHolder[0]
         } catch (e: Exception) {
             false
         }

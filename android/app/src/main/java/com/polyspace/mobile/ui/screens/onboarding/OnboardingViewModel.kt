@@ -1,7 +1,10 @@
 package com.polyspace.mobile.ui.screens.onboarding
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
+import androidx.security.crypto.EncryptedSharedPreferences
+import androidx.security.crypto.MasterKey
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -16,6 +19,24 @@ data class PersonaPreset(
 class OnboardingViewModel(application: Application) : AndroidViewModel(application) {
     private val prefs = application.getSharedPreferences("polyspace_onboarding", 0)
     private val backendPrefs = application.getSharedPreferences("polyspace_backend", 0)
+
+    private val securePrefs: android.content.SharedPreferences by lazy {
+        try {
+            val masterKey = MasterKey.Builder(application)
+                .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                .build()
+            EncryptedSharedPreferences.create(
+                application,
+                "polyspace_secure_keys",
+                masterKey,
+                EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+            )
+        } catch (e: Exception) {
+            Log.e("OnboardingVM", "Failed to create EncryptedSharedPreferences", e)
+            application.getSharedPreferences("polyspace_secure_keys_fallback", 0)
+        }
+    }
 
     val isOnboardingCompleted: Boolean
         get() = prefs.getBoolean("completed", false)
@@ -133,6 +154,17 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
                     val envKey = envMap[tier] ?: return@forEach
                     val modelStr = if (apiBase.isNotBlank()) "$provider/$modelId|$apiBase" else "$provider/$modelId"
                     putString(envKey, modelStr)
+                }
+            }
+        }.apply()
+
+        securePrefs.edit().apply {
+            tiers.forEach { tier ->
+                val provider = _tierProviders.value[tier] ?: ""
+                val modelId = _providerModelIds.value["tier_$tier"] ?: ""
+                val apiKey = _providerApiKeys.value["tier_$tier"] ?: ""
+                if (provider.isNotBlank() && modelId.isNotBlank()) {
+                    val envKey = envMap[tier] ?: return@forEach
                     putString("${envKey}_KEY", apiKey)
                 }
             }
@@ -141,6 +173,7 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
 
     companion object {
         const val PREFS_NAME = "polyspace_onboarding"
+        const val SECURE_PREFS_NAME = "polyspace_secure_keys"
         const val TOTAL_PAGES = 6
 
         fun isCompleted(context: android.content.Context): Boolean {
@@ -151,6 +184,28 @@ class OnboardingViewModel(application: Application) : AndroidViewModel(applicati
         fun getSelectedTheme(context: android.content.Context): String {
             val prefs = context.getSharedPreferences(PREFS_NAME, 0)
             return prefs.getString("theme", "auto") ?: "auto"
+        }
+
+        fun getSecurePrefs(context: android.content.Context): android.content.SharedPreferences {
+            return try {
+                val masterKey = MasterKey.Builder(context)
+                    .setKeyScheme(MasterKey.KeyScheme.AES256_GCM)
+                    .build()
+                EncryptedSharedPreferences.create(
+                    context,
+                    SECURE_PREFS_NAME,
+                    masterKey,
+                    EncryptedSharedPreferences.PrefKeyEncryptionScheme.AES256_SIV,
+                    EncryptedSharedPreferences.PrefValueEncryptionScheme.AES256_GCM
+                )
+            } catch (e: Exception) {
+                Log.e("OnboardingVM", "Failed to create EncryptedSharedPreferences", e)
+                context.getSharedPreferences("polyspace_secure_keys_fallback", 0)
+            }
+        }
+
+        fun getApiKey(context: android.content.Context, key: String): String? {
+            return getSecurePrefs(context).getString(key, null)
         }
     }
 }

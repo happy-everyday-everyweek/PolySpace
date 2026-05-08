@@ -20,6 +20,7 @@ import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
 import java.util.concurrent.TimeUnit
+import java.util.concurrent.atomic.AtomicBoolean
 
 object CrossDeviceBridge {
 
@@ -45,6 +46,7 @@ object CrossDeviceBridge {
     private val baseReconnectInterval: Long = 3000
     private val heartbeatInterval: Long = 15000
     private var heartbeatJob: kotlinx.coroutines.Job? = null
+    private val isConnecting = AtomicBoolean(false)
 
     private val okHttpClient: OkHttpClient by lazy {
         OkHttpClient.Builder()
@@ -65,6 +67,10 @@ object CrossDeviceBridge {
     }
 
     fun connectWebSocket(context: Context) {
+        if (!isConnecting.compareAndSet(false, true)) {
+            Log.i(TAG, "WebSocket connection already in progress, skipping")
+            return
+        }
         appContext = context.applicationContext
         bridgeScope.launch {
             val id = deviceId.ifEmpty {
@@ -78,8 +84,17 @@ object CrossDeviceBridge {
             val wsUrl = "ws://$host:$port/api/v1/devices/ws/$id"
             val request = Request.Builder().url(wsUrl).build()
 
+            val oldSocket = webSocket
+            if (oldSocket != null) {
+                try {
+                    oldSocket.close(1000, "Reconnecting")
+                } catch (_: Exception) {}
+                webSocket = null
+            }
+
             webSocket = okHttpClient.newWebSocket(request, object : WebSocketListener() {
                 override fun onOpen(webSocket: WebSocket, response: Response) {
+                    isConnecting.set(false)
                     Log.i(TAG, "WebSocket connected")
                     reconnectAttempts = 0
                     registered = true
@@ -110,12 +125,14 @@ object CrossDeviceBridge {
                 }
 
                 override fun onClosed(webSocket: WebSocket, code: Int, reason: String) {
+                    isConnecting.set(false)
                     Log.i(TAG, "WebSocket closed: $code $reason")
                     registered = false
                     scheduleReconnect()
                 }
 
                 override fun onFailure(webSocket: WebSocket, t: Throwable, response: Response?) {
+                    isConnecting.set(false)
                     Log.e(TAG, "WebSocket failure: ${t.message}")
                     registered = false
                     scheduleReconnect()
@@ -294,6 +311,7 @@ object CrossDeviceBridge {
     fun disconnect() {
         heartbeatJob?.cancel()
         reconnectAttempts = maxReconnectAttempts
+        isConnecting.set(false)
         val message = JSONObject().apply {
             put("type", "disconnect")
             put("reason", "client_shutdown")
