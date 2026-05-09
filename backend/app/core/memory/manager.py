@@ -129,6 +129,7 @@ class FileMemoryStorage(MemoryStorage):
         self._flush_buffer_sync()
 
     def _flush_buffer_sync(self) -> None:
+        failed_entries: dict[str | None, dict[str, Any]] = {}
         for agent_name, memory_data in list(self._write_buffer.items()):
             file_path = self._get_file_path(agent_name)
             try:
@@ -139,7 +140,10 @@ class FileMemoryStorage(MemoryStorage):
                 self._cache[agent_name] = (memory_data, mtime)
             except OSError as e:
                 logger.error("Failed to flush memory for %s: %s", agent_name, e)
+                failed_entries[agent_name] = memory_data
         self._write_buffer.clear()
+        for agent_name, memory_data in failed_entries.items():
+            self._write_buffer[agent_name] = memory_data
 
 
 class MemoryManager:

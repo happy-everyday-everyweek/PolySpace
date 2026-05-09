@@ -206,3 +206,55 @@ class TestSafeEvaluator:
     def test_float_numbers(self):
         assert self.safe_eval("3.14 + 2.86") == 6.0
         assert self.safe_eval("10.5 / 2") == 5.25
+
+
+class TestFileMemoryStorage:
+    def test_flush_preserves_failed_entries_in_buffer(self):
+        import tempfile
+        import json
+        from pathlib import Path
+        from app.core.memory.manager import FileMemoryStorage
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = FileMemoryStorage(base_dir=tmpdir)
+
+            storage._write_buffer[None] = {"version": "1.0", "lastUpdated": "2024-01-01", "test": "data1"}
+            storage._write_buffer["agent1"] = {"version": "1.0", "lastUpdated": "2024-01-01", "test": "data2"}
+
+            original_flush = storage._flush_buffer_sync
+
+            def failing_flush():
+                failed_entries = {}
+                for agent_name, memory_data in list(storage._write_buffer.items()):
+                    file_path = storage._get_file_path(agent_name)
+                    if agent_name == "agent1":
+                        failed_entries[agent_name] = memory_data
+                        continue
+                    tmp_path = file_path.with_suffix(".tmp")
+                    tmp_path.write_text(json.dumps(memory_data, ensure_ascii=False, indent=2), encoding="utf-8")
+                    tmp_path.replace(file_path)
+                    mtime = file_path.stat().st_mtime
+                    storage._cache[agent_name] = (memory_data, mtime)
+                storage._write_buffer.clear()
+                for agent_name, memory_data in failed_entries.items():
+                    storage._write_buffer[agent_name] = memory_data
+
+            storage._flush_buffer_sync = failing_flush
+            storage._flush_buffer_sync()
+
+            assert "agent1" in storage._write_buffer
+            assert storage._write_buffer["agent1"]["test"] == "data2"
+
+    def test_flush_clears_successful_entries(self):
+        import tempfile
+        from app.core.memory.manager import FileMemoryStorage
+
+        with tempfile.TemporaryDirectory() as tmpdir:
+            storage = FileMemoryStorage(base_dir=tmpdir)
+
+            storage._write_buffer[None] = {"version": "1.0", "lastUpdated": "2024-01-01", "test": "success"}
+            storage._write_buffer["agent1"] = {"version": "1.0", "lastUpdated": "2024-01-01", "test": "success2"}
+
+            storage._flush_buffer_sync()
+
+            assert len(storage._write_buffer) == 0
