@@ -2,7 +2,8 @@ from __future__ import annotations
 
 from typing import Any, Optional
 
-from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, HTTPException, WebSocket, WebSocketDisconnect, Depends
 from pydantic import BaseModel
 
 from app.core.connector.device_manager import DeviceStatus, device_manager
@@ -32,7 +33,9 @@ class DeviceBroadcastRequest(BaseModel):
 
 
 @router.get("/list")
-async def list_devices(platform: Optional[str] = None, status: Optional[str] = None):
+async def list_devices(platform: Optional[str] = None, status: Optional[str] = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     devices = device_manager.list_devices(platform=platform, status=status)
     return {
         "devices": [d.to_dict() for d in devices],
@@ -42,7 +45,9 @@ async def list_devices(platform: Optional[str] = None, status: Optional[str] = N
 
 
 @router.get("/{device_id}")
-async def get_device(device_id: str):
+async def get_device(device_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     device = device_manager.get_device(device_id)
     if not device:
         raise HTTPException(status_code=404, detail=f"Device not found: {device_id}")
@@ -50,7 +55,9 @@ async def get_device(device_id: str):
 
 
 @router.get("/{device_id}/capabilities")
-async def get_device_capabilities(device_id: str):
+async def get_device_capabilities(device_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     device = device_manager.get_device(device_id)
     if not device:
         raise HTTPException(status_code=404, detail=f"Device not found: {device_id}")
@@ -69,7 +76,9 @@ async def get_device_capabilities(device_id: str):
 
 
 @router.post("/{device_id}/execute")
-async def execute_on_device(device_id: str, request: DeviceToolCallRequest):
+async def execute_on_device(device_id: str, request: DeviceToolCallRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     device = device_manager.get_device(device_id)
     if not device:
         raise HTTPException(status_code=404, detail=f"Device not found: {device_id}")
@@ -87,7 +96,9 @@ async def execute_on_device(device_id: str, request: DeviceToolCallRequest):
 
 
 @router.post("/broadcast")
-async def broadcast_to_devices(request: DeviceBroadcastRequest):
+async def broadcast_to_devices(request: DeviceBroadcastRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     results = await device_manager.broadcast_to_devices(
         message=request.message,
         platform=request.platform,
@@ -96,7 +107,9 @@ async def broadcast_to_devices(request: DeviceBroadcastRequest):
 
 
 @router.delete("/{device_id}")
-async def disconnect_device(device_id: str):
+async def disconnect_device(device_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     removed_tools = await tool_registry.unregister_device_tools(device_id)
     await device_manager.disconnect_device(device_id)
     return {"status": "ok", "removed_tools": removed_tools}

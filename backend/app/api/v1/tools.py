@@ -1,7 +1,8 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.api.v1.auth import get_current_user
 from app.core.capability.base import CapabilityCategory, CapabilityPlatform, CapabilitySource
 from app.core.capability.executor import capability_executor
 from app.core.capability.registry import capability_registry
@@ -16,7 +17,9 @@ router = APIRouter()
 
 
 @router.get("/list")
-async def list_tools(include_remote: bool = True):
+async def list_tools(include_remote: bool = True, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     tools = tool_registry.list_tools()
     if not include_remote:
         tools = [t for t in tools if not t.get("is_remote", False)]
@@ -24,7 +27,9 @@ async def list_tools(include_remote: bool = True):
 
 
 @router.get("/definitions")
-async def get_tool_definitions(include_remote: bool = True):
+async def get_tool_definitions(include_remote: bool = True, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if include_remote:
         definitions = tool_registry.get_definitions()
     else:
@@ -33,12 +38,16 @@ async def get_tool_definitions(include_remote: bool = True):
 
 
 @router.get("/remote-definitions")
-async def get_remote_tool_definitions():
+async def get_remote_tool_definitions(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"definitions": tool_registry.get_remote_definitions()}
 
 
 @router.post("/call/{tool_name}")
-async def call_tool(tool_name: str, params: Optional[dict] = None, device_id: Optional[str] = None):
+async def call_tool(tool_name: str, params: Optional[dict] = None, device_id: Optional[str] = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     params = params or {}
     try:
         if device_id:
@@ -63,7 +72,9 @@ async def call_tool(tool_name: str, params: Optional[dict] = None, device_id: Op
 
 
 @router.post("/activate/{tool_name}")
-async def activate_tool(tool_name: str):
+async def activate_tool(tool_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         await tool_registry.activate_tool(tool_name)
         return {"status": "ok", "tool": tool_name, "state": "active"}
@@ -73,7 +84,9 @@ async def activate_tool(tool_name: str):
 
 
 @router.post("/hibernate/{tool_name}")
-async def hibernate_tool(tool_name: str):
+async def hibernate_tool(tool_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         await tool_registry.hibernate_tool(tool_name)
         return {"status": "ok", "tool": tool_name, "state": "inactive"}
@@ -83,7 +96,9 @@ async def hibernate_tool(tool_name: str):
 
 
 @router.get("/mcp/servers")
-async def list_mcp_servers():
+async def list_mcp_servers(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "registered": mcp_client.get_registered_servers(),
         "connected": mcp_client.get_connected_servers(),
@@ -91,7 +106,9 @@ async def list_mcp_servers():
 
 
 @router.post("/mcp/register")
-async def register_mcp_server(config: dict):
+async def register_mcp_server(config: dict, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.mcp.client import MCPServerConfig
     server_config = MCPServerConfig(
         name=config.get("name", ""),
@@ -105,7 +122,9 @@ async def register_mcp_server(config: dict):
 
 
 @router.post("/mcp/connect/{server_name}")
-async def connect_mcp_server(server_name: str):
+async def connect_mcp_server(server_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     connected = await mcp_client.connect(server_name)
     if connected:
         tools = await mcp_client.list_tools()
@@ -115,20 +134,26 @@ async def connect_mcp_server(server_name: str):
 
 
 @router.post("/mcp/disconnect/{server_name}")
-async def disconnect_mcp_server(server_name: str):
+async def disconnect_mcp_server(server_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     await mcp_client.disconnect(server_name)
     return {"status": "ok", "server": server_name}
 
 
 @router.delete("/mcp/servers/{server_name}")
-async def unregister_mcp_server(server_name: str):
+async def unregister_mcp_server(server_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     await mcp_client.disconnect(server_name)
     mcp_client.unregister_server(server_name)
     return {"status": "ok", "server": server_name}
 
 
 @router.get("/mcp/tools")
-async def list_mcp_tools():
+async def list_mcp_tools(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     tools = await mcp_client.list_tools()
     return {"tools": [
         {"name": t.name, "description": t.description, "server": t.server_name}
@@ -137,7 +162,9 @@ async def list_mcp_tools():
 
 
 @router.get("/skills")
-async def list_skills():
+async def list_skills(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     skills = skill_loader.list_skills()
     return {"skills": [
         {"name": s.name, "description": s.description, "version": s.version, "category": s.category}
@@ -146,7 +173,9 @@ async def list_skills():
 
 
 @router.post("/skills/discover")
-async def discover_skills():
+async def discover_skills(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     discovered = skill_loader.discover()
     return {"discovered": len(discovered), "skills": [
         {"name": s.name, "description": s.description}
@@ -155,7 +184,9 @@ async def discover_skills():
 
 
 @router.post("/skills/execute/{skill_name}")
-async def execute_skill(skill_name: str, params: Optional[dict] = None):
+async def execute_skill(skill_name: str, params: Optional[dict] = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     params = params or {}
     try:
         result = await skill_loader.execute_skill(skill_name, **params)
@@ -169,7 +200,9 @@ async def execute_skill(skill_name: str, params: Optional[dict] = None):
 
 
 @router.get("/hub/search")
-async def search_hub(query: str, category: str | None = None, limit: int = 20):
+async def search_hub(query: str, category: str | None = None, limit: int = 20, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     items = await clawhub_client.search(query, category, limit)
     return {"items": [
         {
@@ -181,7 +214,9 @@ async def search_hub(query: str, category: str | None = None, limit: int = 20):
 
 
 @router.post("/hub/install/{item_id}")
-async def install_hub_item(item_id: str):
+async def install_hub_item(item_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     item = await clawhub_client.install(item_id)
     if item:
         return {"status": "ok", "item": {"id": item.id, "name": item.name}}
@@ -190,7 +225,9 @@ async def install_hub_item(item_id: str):
 
 
 @router.post("/hub/uninstall/{item_id}")
-async def uninstall_hub_item(item_id: str):
+async def uninstall_hub_item(item_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     success = await clawhub_client.uninstall(item_id)
     if success:
         return {"status": "ok"}
@@ -199,7 +236,9 @@ async def uninstall_hub_item(item_id: str):
 
 
 @router.get("/hub/installed")
-async def list_installed_hub_items(category: str | None = None):
+async def list_installed_hub_items(category: str | None = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     items = clawhub_client.list_installed(category)
     return {"items": [
         {"id": i.id, "name": i.name, "version": i.version, "category": i.category}
@@ -208,7 +247,9 @@ async def list_installed_hub_items(category: str | None = None):
 
 
 @router.get("/unified/specs")
-async def get_unified_tool_specs(platform: Optional[str] = None, category: Optional[str] = None):
+async def get_unified_tool_specs(platform: Optional[str] = None, category: Optional[str] = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if platform:
         try:
             pf = ToolPlatform(platform.lower())
@@ -227,12 +268,16 @@ async def get_unified_tool_specs(platform: Optional[str] = None, category: Optio
 
 
 @router.get("/unified/platform-summary")
-async def get_platform_summary():
+async def get_platform_summary(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return unified_tool_registry.get_platform_summary()
 
 
 @router.get("/unified/specs/{tool_name}")
-async def get_unified_tool_spec(tool_name: str):
+async def get_unified_tool_spec(tool_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     spec = unified_tool_registry.get_spec(tool_name)
     if not spec:
         from fastapi import HTTPException
@@ -241,7 +286,9 @@ async def get_unified_tool_spec(tool_name: str):
 
 
 @router.get("/unified/specs/{tool_name}/openai")
-async def get_unified_tool_spec_openai(tool_name: str):
+async def get_unified_tool_spec_openai(tool_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     spec = unified_tool_registry.get_spec(tool_name)
     if not spec:
         from fastapi import HTTPException
@@ -255,7 +302,10 @@ async def list_capabilities(
     platform: Optional[str] = None,
     category: Optional[str] = None,
     keyword: Optional[str] = None,
+    user=Depends(get_current_user)
 ):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     st = CapabilitySource(source_type) if source_type else None
     pf = CapabilityPlatform(platform) if platform else None
     cat = CapabilityCategory(category) if category else None
@@ -271,7 +321,10 @@ async def list_capabilities(
 async def get_capability_definitions(
     source_type: Optional[str] = None,
     platform: Optional[str] = None,
+    user=Depends(get_current_user)
 ):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     st = CapabilitySource(source_type) if source_type else None
     pf = CapabilityPlatform(platform) if platform else None
     definitions = capability_registry.get_definitions(source_type=st, platform=pf)
@@ -279,7 +332,9 @@ async def get_capability_definitions(
 
 
 @router.get("/capabilities/{capability_name}")
-async def get_capability_detail(capability_name: str):
+async def get_capability_detail(capability_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     meta = capability_registry.get(capability_name)
     if not meta:
         from fastapi import HTTPException
@@ -288,7 +343,9 @@ async def get_capability_detail(capability_name: str):
 
 
 @router.post("/capabilities/{capability_name}/execute")
-async def execute_capability(capability_name: str, params: Optional[dict] = None):
+async def execute_capability(capability_name: str, params: Optional[dict] = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     params = params or {}
     from app.core.capability.base import CapabilityCallContext
     context = CapabilityCallContext()
@@ -297,7 +354,9 @@ async def execute_capability(capability_name: str, params: Optional[dict] = None
 
 
 @router.post("/capabilities/{capability_name}/activate")
-async def activate_capability(capability_name: str):
+async def activate_capability(capability_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         await capability_executor.activate(capability_name)
         return {"status": "ok", "capability": capability_name, "state": "active"}
@@ -307,7 +366,9 @@ async def activate_capability(capability_name: str):
 
 
 @router.post("/capabilities/{capability_name}/deactivate")
-async def deactivate_capability(capability_name: str):
+async def deactivate_capability(capability_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         await capability_executor.deactivate(capability_name)
         return {"status": "ok", "capability": capability_name, "state": "inactive"}
@@ -317,13 +378,17 @@ async def deactivate_capability(capability_name: str):
 
 
 @router.post("/capabilities/{capability_name}/health-check")
-async def health_check_capability(capability_name: str):
+async def health_check_capability(capability_name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     healthy = await capability_executor.health_check(capability_name)
     return {"capability": capability_name, "healthy": healthy}
 
 
 @router.post("/capabilities/initialize")
-async def initialize_capabilities():
+async def initialize_capabilities(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     registered = await capability_registry.initialize()
     return {
         "status": "ok",
@@ -334,17 +399,23 @@ async def initialize_capabilities():
 
 
 @router.get("/capabilities/summary/sources")
-async def get_capability_source_summary():
+async def get_capability_source_summary(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return capability_registry.get_summary_by_source()
 
 
 @router.get("/capabilities/summary/categories")
-async def get_capability_category_summary():
+async def get_capability_category_summary(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return capability_registry.get_summary_by_category()
 
 
 @router.post("/cli/scan")
-async def scan_cli_tools():
+async def scan_cli_tools(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.capability.providers.cli import CLISniffer
     sniffer = CLISniffer()
     tool_defs = await sniffer.scan()

@@ -2,10 +2,11 @@ import json
 import uuid
 from typing import Optional
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
+from app.api.v1.auth import get_current_user
 from app.core.exceptions import ServiceUnavailableError
 from app.dependencies import container
 
@@ -35,7 +36,9 @@ def _get_chat_service():
 
 
 @router.post("/send", response_model=ChatResponse)
-async def send_message(request: ChatRequest):
+async def send_message(request: ChatRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     session_id = request.session_id or str(uuid.uuid4())
     chat_service = _get_chat_service()
 
@@ -74,7 +77,9 @@ async def send_message(request: ChatRequest):
 
 
 @router.post("/stream")
-async def stream_message(request: ChatRequest):
+async def stream_message(request: ChatRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     session_id = request.session_id or str(uuid.uuid4())
     chat_service = _get_chat_service()
 
@@ -99,17 +104,23 @@ async def stream_message(request: ChatRequest):
 
 
 @router.get("/history/{session_id}")
-async def get_history(session_id: str, limit: int = 50):
+async def get_history(session_id: str, limit: int = 50, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"session_id": session_id, "messages": []}
 
 
 @router.delete("/session/{session_id}")
-async def delete_session(session_id: str):
+async def delete_session(session_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"status": "ok", "session_id": session_id}
 
 
 @router.get("/emotion")
-async def get_current_emotion():
+async def get_current_emotion(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     chat_service = _get_chat_service()
     if chat_service is None:
         return {
@@ -129,7 +140,9 @@ async def get_current_emotion():
 
 
 @router.get("/persona")
-async def get_current_persona():
+async def get_current_persona(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     chat_service = _get_chat_service()
     if chat_service is None:
         return {"name": "Poly", "relationship": "stranger"}

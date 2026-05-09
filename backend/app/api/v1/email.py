@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from ...services.email.models import SendMessageInput
@@ -102,7 +103,9 @@ class TemplateRenderRequest(BaseModel):
 
 
 @router.post("/accounts")
-async def create_account(account: AccountCreate):
+async def create_account(account: AccountCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     account_id = await svc.add_account(
         name=account.name,
@@ -120,14 +123,18 @@ async def create_account(account: AccountCreate):
 
 
 @router.get("/accounts")
-async def list_accounts():
+async def list_accounts(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     accounts = await svc.list_accounts()
     return {"accounts": accounts}
 
 
 @router.get("/accounts/{account_id}")
-async def get_account(account_id: int):
+async def get_account(account_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     account = await svc.get_account(account_id)
     if not account:
@@ -136,7 +143,9 @@ async def get_account(account_id: int):
 
 
 @router.patch("/accounts/{account_id}")
-async def update_account(account_id: int, update: AccountUpdate):
+async def update_account(account_id: int, update: AccountUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     updates = {k: v for k, v in update.model_dump().items() if v is not None}
     if not updates:
@@ -148,7 +157,9 @@ async def update_account(account_id: int, update: AccountUpdate):
 
 
 @router.delete("/accounts/{account_id}")
-async def delete_account(account_id: int):
+async def delete_account(account_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.delete_account(account_id)
     return {"status": "deleted"}
@@ -156,35 +167,45 @@ async def delete_account(account_id: int):
 
 @router.get("/accounts/{account_id}/emails")
 async def get_emails(account_id: int, folder: str = "INBOX",
-                     limit: int = 50, offset: int = 0, search: str = ""):
+                     if not user:
+                         raise HTTPException(status_code=401, detail="Not authenticated")
+                     limit: int = 50, offset: int = 0, search: str = "", user=Depends(get_current_user)):
     svc = get_email_service()
     emails = await svc.fetch_emails(account_id, folder, limit, offset, search)
     return {"emails": emails}
 
 
 @router.get("/accounts/{account_id}/stats")
-async def get_email_stats(account_id: int):
+async def get_email_stats(account_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     stats = await svc.get_email_stats(account_id)
     return stats
 
 
 @router.post("/accounts/{account_id}/sync")
-async def sync_emails(account_id: int, folder: str = "INBOX", limit: int = 50):
+async def sync_emails(account_id: int, folder: str = "INBOX", limit: int = 50, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     synced = await svc.sync_emails(account_id, folder, limit)
     return {"synced": synced}
 
 
 @router.get("/accounts/{account_id}/folders")
-async def list_folders(account_id: int):
+async def list_folders(account_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     folders = await svc.list_folders(account_id)
     return {"folders": folders}
 
 
 @router.get("/emails/{email_id}")
-async def get_email(email_id: int):
+async def get_email(email_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     email = await svc.get_email(email_id)
     if not email:
@@ -193,14 +214,18 @@ async def get_email(email_id: int):
 
 
 @router.get("/threads/{thread_id}")
-async def get_thread(thread_id: str):
+async def get_thread(thread_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     emails = await svc.get_thread_emails(thread_id)
     return {"emails": emails}
 
 
 @router.post("/send")
-async def send_email(email: EmailSend):
+async def send_email(email: EmailSend, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     send_input = SendMessageInput(
         to=email.to,
@@ -219,7 +244,9 @@ async def send_email(email: EmailSend):
 
 
 @router.post("/drafts")
-async def save_draft(draft: DraftCreate):
+async def save_draft(draft: DraftCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     draft_id = await svc.save_draft(
         account_id=draft.account_id,
@@ -236,14 +263,18 @@ async def save_draft(draft: DraftCreate):
 
 
 @router.get("/drafts/{account_id}")
-async def list_drafts(account_id: int):
+async def list_drafts(account_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     drafts = await svc.list_drafts(account_id)
     return {"drafts": drafts}
 
 
 @router.patch("/drafts/{draft_id}")
-async def update_draft(draft_id: int, update: DraftUpdate):
+async def update_draft(draft_id: int, update: DraftUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     updates = {}
     if update.subject is not None:
@@ -271,63 +302,81 @@ async def update_draft(draft_id: int, update: DraftUpdate):
 
 
 @router.delete("/drafts/{draft_id}")
-async def delete_draft(draft_id: int):
+async def delete_draft(draft_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.delete_draft(draft_id)
     return {"status": "deleted"}
 
 
 @router.put("/emails/{email_id}/read")
-async def mark_read(email_id: int, req: ReadRequest):
+async def mark_read(email_id: int, req: ReadRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.mark_read(email_id, req.is_read)
     return {"status": "updated"}
 
 
 @router.put("/emails/{email_id}/star")
-async def mark_starred(email_id: int, req: StarRequest):
+async def mark_starred(email_id: int, req: StarRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.mark_starred(email_id, req.is_starred)
     return {"status": "updated"}
 
 
 @router.delete("/emails/{email_id}")
-async def delete_email(email_id: int):
+async def delete_email(email_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.delete_email(email_id)
     return {"status": "deleted"}
 
 
 @router.put("/emails/{email_id}/move")
-async def move_email(email_id: int, req: MoveEmailRequest):
+async def move_email(email_id: int, req: MoveEmailRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.move_email(email_id, req.folder)
     return {"status": "moved"}
 
 
 @router.put("/emails/batch/read")
-async def batch_mark_read(req: BatchReadRequest):
+async def batch_mark_read(req: BatchReadRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.batch_mark_read(req.email_ids, req.is_read)
     return {"status": "updated"}
 
 
 @router.delete("/emails/batch")
-async def batch_delete(req: BatchDeleteRequest):
+async def batch_delete(req: BatchDeleteRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     svc = get_email_service()
     await svc.batch_delete(req.email_ids)
     return {"status": "deleted"}
 
 
 @router.get("/templates")
-async def list_templates():
+async def list_templates(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     mgr = get_template_manager()
     templates = mgr.list_templates()
     return {"templates": templates}
 
 
 @router.post("/templates")
-async def create_template(template: TemplateCreate):
+async def create_template(template: TemplateCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from ...services.email.templates import EmailTemplate
     mgr = get_template_manager()
     t = EmailTemplate(
@@ -343,7 +392,9 @@ async def create_template(template: TemplateCreate):
 
 
 @router.delete("/templates/{name}")
-async def delete_template(name: str):
+async def delete_template(name: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     mgr = get_template_manager()
     success = mgr.delete_template(name)
     if not success:
@@ -352,7 +403,9 @@ async def delete_template(name: str):
 
 
 @router.post("/templates/render")
-async def render_template(req: TemplateRenderRequest):
+async def render_template(req: TemplateRenderRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     mgr = get_template_manager()
     result = mgr.render_template(req.name, req.context)
     if not result:

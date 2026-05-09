@@ -2,7 +2,8 @@ import logging
 import os
 from typing import Optional
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, Depends
 
 from app.services.doc_conversion_service import doc_conversion_service
 from app.services.libreoffice_service import libreoffice_service
@@ -15,13 +16,17 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 
 @router.get("/libreoffice/status")
-async def libreoffice_status():
+async def libreoffice_status(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     info = await libreoffice_service.get_info()
     return info
 
 
 @router.post("/convert")
 async def convert_document(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file: UploadFile = File(...),
     output_format: str = Query(
         "pdf",
@@ -67,6 +72,8 @@ async def convert_document(
 
 @router.post("/html/to/docx")
 async def html_to_docx(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     html_content: str = Query(..., description="HTML content to convert"),
     title: str = Query("Document", description="Document title"),
 ):
@@ -88,6 +95,8 @@ async def html_to_docx(
 
 @router.post("/html/to/pdf")
 async def html_to_pdf(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     html_content: str = Query(..., description="HTML content to convert"),
     title: str = Query("Document", description="Document title"),
 ):
@@ -103,6 +112,8 @@ async def html_to_pdf(
 
 @router.post("/file/convert")
 async def convert_file_by_path(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path: str = Query(..., description="Path to the file to convert"),
     output_format: str = Query("pdf", description="Target format"),
     source_format: Optional[str] = Query(None, description="Source format"),

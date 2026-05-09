@@ -1,6 +1,7 @@
 from typing import Any, Optional
 
-from fastapi import APIRouter, Request
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Request, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.core.audit.models import AuditCategory, AuditLevel
@@ -52,7 +53,9 @@ class HandoffSyncRequest(BaseModel):
 
 
 @router.post("/register")
-async def register_device(request: SyncRegisterRequest, http_request: Request):
+async def register_device(request: SyncRegisterRequest, http_request: Request, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     device = await sync_service.register_device(
         device_id=request.device_id,
         device_name=request.device_name,
@@ -80,7 +83,9 @@ async def register_device(request: SyncRegisterRequest, http_request: Request):
 
 
 @router.post("/push")
-async def push_changes(request: SyncPushRequest, http_request: Request):
+async def push_changes(request: SyncPushRequest, http_request: Request, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await sync_service.push_changes(
         device_id=request.device_id,
         changes=request.changes,
@@ -100,7 +105,9 @@ async def push_changes(request: SyncPushRequest, http_request: Request):
 
 
 @router.post("/pull")
-async def pull_changes(request: SyncPullRequest, http_request: Request):
+async def pull_changes(request: SyncPullRequest, http_request: Request, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await sync_service.pull_changes(
         device_id=request.device_id,
         since=request.since,
@@ -121,12 +128,16 @@ async def pull_changes(request: SyncPullRequest, http_request: Request):
 
 
 @router.get("/status/{device_id}")
-async def sync_status(device_id: str):
+async def sync_status(device_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await sync_service.get_status(device_id)
 
 
 @router.get("/devices")
-async def all_devices_status():
+async def all_devices_status(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "devices": await sync_service.get_all_devices_status(),
         "count": len(sync_service._devices),
@@ -134,7 +145,9 @@ async def all_devices_status():
 
 
 @router.get("/conflicts/{device_id}")
-async def detect_conflicts(device_id: str):
+async def detect_conflicts(device_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     conflicts = await sync_service.detect_conflicts(device_id)
     return {
         "device_id": device_id,
@@ -144,7 +157,9 @@ async def detect_conflicts(device_id: str):
 
 
 @router.post("/resolve-conflict")
-async def resolve_conflict(request: SyncConflictResolveRequest, http_request: Request = None):
+async def resolve_conflict(request: SyncConflictResolveRequest, http_request: Request = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await sync_service.resolve_conflict(
         conflict_id=request.conflict_id,
         resolution=request.resolution,
@@ -164,7 +179,9 @@ async def resolve_conflict(request: SyncConflictResolveRequest, http_request: Re
 
 
 @router.post("/github")
-async def sync_to_github(request: SyncGitHubRequest, http_request: Request):
+async def sync_to_github(request: SyncGitHubRequest, http_request: Request, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await sync_service.encrypt_and_sync_to_github(
         device_id=request.device_id,
         repo=request.repo,
@@ -186,7 +203,9 @@ async def sync_to_github(request: SyncGitHubRequest, http_request: Request):
 
 
 @router.put("/scopes")
-async def update_sync_scopes(request: SyncScopesUpdateRequest):
+async def update_sync_scopes(request: SyncScopesUpdateRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await sync_service.update_device_scopes(
         device_id=request.device_id,
         scopes=request.scopes,
@@ -195,7 +214,9 @@ async def update_sync_scopes(request: SyncScopesUpdateRequest):
 
 
 @router.post("/handoff")
-async def handoff_sync(request: HandoffSyncRequest, http_request: Request):
+async def handoff_sync(request: HandoffSyncRequest, http_request: Request, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await sync_service.trigger_handoff_sync(
         source_device_id=request.source_device_id,
         target_device_id=request.target_device_id,
@@ -215,19 +236,25 @@ async def handoff_sync(request: HandoffSyncRequest, http_request: Request):
 
 
 @router.post("/auto-sync/start")
-async def start_auto_sync(interval_sec: int = 300):
+async def start_auto_sync(interval_sec: int = 300, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     await sync_service.start_auto_sync(interval_sec)
     return {"status": "ok", "interval_sec": interval_sec}
 
 
 @router.post("/auto-sync/stop")
-async def stop_auto_sync():
+async def stop_auto_sync(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     await sync_service.stop_auto_sync()
     return {"status": "ok"}
 
 
 @router.get("/meta")
-async def sync_meta():
+async def sync_meta(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "sync_scopes": SYNC_SCOPES,
         "conflict_strategies": CONFLICT_STRATEGIES,

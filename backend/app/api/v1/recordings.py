@@ -6,6 +6,7 @@ import uuid
 from datetime import datetime, timedelta
 from typing import Optional
 
+from app.api.v1.auth import get_current_user
 from fastapi import APIRouter, Body, Depends, File, Form, HTTPException, Query, UploadFile
 from fastapi.responses import FileResponse
 from pydantic import BaseModel
@@ -34,6 +35,8 @@ def _recording_dir(rec_id: str) -> str:
 
 @router.post("/upload")
 async def upload_recording(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file: UploadFile = File(...),
     duration: float = Form(0),
     source_type: str = Form("screen"),
@@ -105,6 +108,8 @@ async def upload_recording(
 
 @router.get("")
 async def list_recordings(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     limit: int = Query(20, ge=1, le=100),
     offset: int = Query(0, ge=0),
     status: Optional[str] = Query(None),
@@ -142,6 +147,8 @@ async def list_recordings(
 
 @router.get("/{recording_id}")
 async def get_recording(recording_id: str, db: AsyncSession = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording = await db.get(Recording, recording_id)
     if not recording:
         raise HTTPException(status_code=404, detail="Recording not found")
@@ -172,6 +179,8 @@ async def get_recording(recording_id: str, db: AsyncSession = Depends(get_db)):
 
 @router.delete("/{recording_id}")
 async def delete_recording(recording_id: str, db: AsyncSession = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording = await db.get(Recording, recording_id)
     if not recording:
         raise HTTPException(status_code=404, detail="Recording not found")
@@ -188,6 +197,8 @@ async def delete_recording(recording_id: str, db: AsyncSession = Depends(get_db)
 
 @router.get("/{recording_id}/download")
 async def download_recording(recording_id: str, db: AsyncSession = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording = await db.get(Recording, recording_id)
     if not recording:
         raise HTTPException(status_code=404, detail="Recording not found")
@@ -202,6 +213,8 @@ async def download_recording(recording_id: str, db: AsyncSession = Depends(get_d
 
 @router.get("/{recording_id}/thumbnail")
 async def get_thumbnail(recording_id: str, db: AsyncSession = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording = await db.get(Recording, recording_id)
     if not recording or not recording.thumbnail_path:
         raise HTTPException(status_code=404, detail="Thumbnail not found")
@@ -220,6 +233,8 @@ class UpdateRecordingRequest(BaseModel):
 
 @router.patch("/{recording_id}")
 async def update_recording(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording_id: str,
     req: UpdateRecordingRequest = Body(default=UpdateRecordingRequest()),
     db: AsyncSession = Depends(get_db),
@@ -247,6 +262,8 @@ class AnalyzeRecordingRequest(BaseModel):
 
 @router.post("/{recording_id}/analyze")
 async def analyze_recording(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording_id: str,
     req: AnalyzeRecordingRequest = Body(default=AnalyzeRecordingRequest()),
     db: AsyncSession = Depends(get_db),
@@ -272,6 +289,8 @@ class TrimRecordingRequest(BaseModel):
 
 @router.post("/{recording_id}/trim")
 async def trim_recording(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording_id: str,
     req: TrimRecordingRequest = Body(default=TrimRecordingRequest()),
     db: AsyncSession = Depends(get_db),
@@ -296,6 +315,8 @@ class ConvertRecordingRequest(BaseModel):
 
 @router.post("/{recording_id}/convert")
 async def convert_recording(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording_id: str,
     req: ConvertRecordingRequest = Body(default=ConvertRecordingRequest()),
     db: AsyncSession = Depends(get_db),
@@ -315,6 +336,8 @@ async def convert_recording(
 
 @router.post("/{recording_id}/share")
 async def share_recording(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording_id: str,
     expires_hours: int = 24,
     db: AsyncSession = Depends(get_db),
@@ -333,6 +356,8 @@ async def share_recording(
 
 @router.get("/shared/{token}")
 async def get_shared_recording(token: str, db: AsyncSession = Depends(get_db)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await db.execute(
         select(Recording).where(Recording.share_token == token)
     )
@@ -351,6 +376,8 @@ async def get_shared_recording(token: str, db: AsyncSession = Depends(get_db)):
 
 @router.post("/{recording_id}/mix-narration")
 async def mix_narration(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     recording_id: str,
     narration: UploadFile = File(...),
     db: AsyncSession = Depends(get_db),

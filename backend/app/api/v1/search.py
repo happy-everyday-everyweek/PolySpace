@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter, Query
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Query, Depends, HTTPException
 from pydantic import BaseModel
 
 router = APIRouter()
@@ -26,6 +27,8 @@ class SearchResponse(BaseModel):
 
 @router.get("", response_model=SearchResponse)
 async def unified_search(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     q: str = Query(..., min_length=1, description="Search query"),
     category: Optional[str] = Query(
         None,
@@ -47,6 +50,8 @@ async def unified_search(
 
 @router.get("/suggestions")
 async def search_suggestions(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     q: str = Query(..., min_length=1),
     limit: int = Query(5, ge=1, le=20),
 ):
@@ -57,11 +62,15 @@ async def search_suggestions(
 
 @router.get("/recent")
 async def recent_searches(limit: int = Query(10, ge=1, le=50)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.services.search_service import search_service
     return {"searches": await search_service.get_recent(limit=limit)}
 
 
 @router.get("/commands")
-async def list_commands():
+async def list_commands(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.services.search_service import search_service
     return {"commands": await search_service.get_all_commands()}

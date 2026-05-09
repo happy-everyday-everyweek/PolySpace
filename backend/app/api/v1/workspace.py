@@ -1,8 +1,9 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query
 from pydantic import BaseModel
 
+from app.api.v1.auth import get_current_user
 from app.services.workspace_service import workspace_service
 
 router = APIRouter()
@@ -32,12 +33,16 @@ class SmartEncouragementRequest(BaseModel):
 
 
 @router.get("/status")
-async def workspace_status():
+async def workspace_status(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await workspace_service.get_status()
 
 
 @router.post("/documents")
-async def create_document(req: CreateDocumentRequest):
+async def create_document(req: CreateDocumentRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     doc = await workspace_service.create_document(
         title=req.title, doc_type=req.doc_type, content=req.content, **req.metadata
     )
@@ -52,7 +57,9 @@ async def create_document(req: CreateDocumentRequest):
 
 
 @router.get("/documents")
-async def list_documents(doc_type: Optional[str] = Query(None)):
+async def list_documents(doc_type: Optional[str] = Query(None), user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     docs = await workspace_service.list_documents(doc_type)
     return {
         "items": [
@@ -70,7 +77,9 @@ async def list_documents(doc_type: Optional[str] = Query(None)):
 
 
 @router.get("/documents/{doc_id}")
-async def get_document(doc_id: str):
+async def get_document(doc_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     doc = await workspace_service.get_document(doc_id)
     if not doc:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -86,7 +95,9 @@ async def get_document(doc_id: str):
 
 
 @router.put("/documents/{doc_id}")
-async def update_document(doc_id: str, req: UpdateDocumentRequest):
+async def update_document(doc_id: str, req: UpdateDocumentRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     updates = {k: v for k, v in req.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -103,7 +114,9 @@ async def update_document(doc_id: str, req: UpdateDocumentRequest):
 
 
 @router.delete("/documents/{doc_id}")
-async def delete_document(doc_id: str):
+async def delete_document(doc_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await workspace_service.delete_document(doc_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Document not found")
@@ -111,7 +124,9 @@ async def delete_document(doc_id: str):
 
 
 @router.post("/document/open")
-async def open_document(path: str):
+async def open_document(path: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await workspace_service.open_document(path)
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
@@ -119,7 +134,9 @@ async def open_document(path: str):
 
 
 @router.post("/presentation/open")
-async def open_presentation(path: str):
+async def open_presentation(path: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await workspace_service.open_presentation(path)
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
@@ -127,7 +144,9 @@ async def open_presentation(path: str):
 
 
 @router.post("/spreadsheet/open")
-async def open_spreadsheet(path: str):
+async def open_spreadsheet(path: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await workspace_service.open_spreadsheet(path)
     if "error" in result:
         raise HTTPException(status_code=404, detail=result["error"])
@@ -135,7 +154,9 @@ async def open_spreadsheet(path: str):
 
 
 @router.get("/recommendations")
-async def get_recommendations(mode: str = Query("normal")):
+async def get_recommendations(mode: str = Query("normal"), user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     items = await workspace_service.get_recommendations(mode)
     return {
         "items": [
@@ -151,7 +172,9 @@ async def get_recommendations(mode: str = Query("normal")):
 
 
 @router.get("/encouragement")
-async def get_encouragement():
+async def get_encouragement(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await workspace_service.get_encouragement()
     return {
         "message": result.message,
@@ -163,7 +186,9 @@ async def get_encouragement():
 
 
 @router.post("/encouragement/smart")
-async def get_smart_encouragement(req: SmartEncouragementRequest):
+async def get_smart_encouragement(req: SmartEncouragementRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await workspace_service.get_smart_encouragement(
         active_tool=req.active_tool,
         work_context=req.work_context,

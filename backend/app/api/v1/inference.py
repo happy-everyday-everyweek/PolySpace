@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.core.inference.local_engine import (
@@ -43,7 +44,9 @@ class InferenceConfigUpdate(BaseModel):
 
 
 @router.get("/status")
-async def get_inference_status():
+async def get_inference_status(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "loaded": local_inference_engine.is_loaded,
         "backend": local_inference_engine.backend.value,
@@ -61,12 +64,16 @@ async def get_inference_status():
 
 
 @router.get("/backends")
-async def list_backends():
+async def list_backends(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"backends": local_inference_engine.get_available_backends()}
 
 
 @router.post("/load")
-async def load_model(request: InferenceLoadRequest):
+async def load_model(request: InferenceLoadRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     backend_map = {
         "llama_cpp": InferenceBackend.LLAMA_CPP,
         "ollama": InferenceBackend.OLLAMA,
@@ -91,13 +98,17 @@ async def load_model(request: InferenceLoadRequest):
 
 
 @router.post("/unload")
-async def unload_model():
+async def unload_model(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     await local_inference_engine.unload()
     return {"success": True, "loaded": False}
 
 
 @router.post("/generate")
-async def generate_text(request: InferenceGenerateRequest):
+async def generate_text(request: InferenceGenerateRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if not local_inference_engine.is_loaded:
         return {
             "success": False,
@@ -123,7 +134,9 @@ async def generate_text(request: InferenceGenerateRequest):
 
 
 @router.put("/config")
-async def update_inference_config(update: InferenceConfigUpdate):
+async def update_inference_config(update: InferenceConfigUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     config = local_inference_engine._config
     data = update.model_dump(exclude_none=True)
     for key, value in data.items():

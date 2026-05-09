@@ -5,7 +5,8 @@ from datetime import datetime, timedelta
 from typing import Optional
 
 import aiosqlite
-from fastapi import APIRouter, Query
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Query, Depends, HTTPException
 from sqlalchemy import func, select
 
 from app.core.audit.models import AUDIT_DB_PATH
@@ -127,6 +128,8 @@ async def _get_audit_activity_stats(start: datetime | None, end: datetime | None
 
 @router.get("/stats")
 async def get_overview_stats(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     period: Optional[str] = Query(None, description="Time period: 7d, 30d, 90d, all"),
 ):
     now = datetime.utcnow()

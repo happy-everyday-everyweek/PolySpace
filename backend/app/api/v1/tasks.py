@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from app.core.tool.interaction_tools import async_task_manager
@@ -36,7 +37,9 @@ class TaskListResponse(BaseModel):
 
 
 @router.get("/{task_id}", response_model=TaskResponse)
-async def get_task(task_id: str):
+async def get_task(task_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     task = async_task_manager.get_task(task_id)
     if task is None:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")
@@ -44,7 +47,9 @@ async def get_task(task_id: str):
 
 
 @router.get("/", response_model=TaskListResponse)
-async def list_tasks(session_id: str = "", limit: int = 50):
+async def list_tasks(session_id: str = "", limit: int = 50, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     tasks = async_task_manager.list_tasks(session_id=session_id, limit=limit)
     return TaskListResponse(
         tasks=[TaskResponse(**t) for t in tasks],
@@ -53,7 +58,9 @@ async def list_tasks(session_id: str = "", limit: int = 50):
 
 
 @router.post("/{task_id}/supplement")
-async def supplement_task(task_id: str, request: TaskSupplementRequest):
+async def supplement_task(task_id: str, request: TaskSupplementRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = async_task_manager.supplement_task(task_id, request.info, source=request.source)
     if "error" in result:
         raise HTTPException(status_code=400, detail=result["error"])
@@ -61,7 +68,9 @@ async def supplement_task(task_id: str, request: TaskSupplementRequest):
 
 
 @router.post("/{task_id}/cancel")
-async def cancel_task(task_id: str):
+async def cancel_task(task_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     task = async_task_manager.get_task(task_id)
     if task is None:
         raise HTTPException(status_code=404, detail=f"Task {task_id} not found")

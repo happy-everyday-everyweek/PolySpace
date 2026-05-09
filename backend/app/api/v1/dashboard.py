@@ -1,4 +1,5 @@
-from fastapi import APIRouter
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException
 
 from app.core.agent.dashboard import dashboard_manager
 
@@ -6,7 +7,9 @@ router = APIRouter()
 
 
 @router.get("/traces")
-async def list_traces(limit: int = 50, status: str | None = None):
+async def list_traces(limit: int = 50, status: str | None = None, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     traces = dashboard_manager.list_traces(limit=limit, status=status)
     return {
         "traces": [
@@ -24,7 +27,9 @@ async def list_traces(limit: int = 50, status: str | None = None):
 
 
 @router.get("/active")
-async def get_active_traces():
+async def get_active_traces(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     traces = dashboard_manager.get_active_traces()
     return {
         "active_traces": [
@@ -40,10 +45,13 @@ async def get_active_traces():
 
 
 @router.get("/trace/{trace_id}")
-async def get_trace(trace_id: str):
+async def get_trace(trace_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     trace = dashboard_manager.get_trace(trace_id)
     if not trace:
-        from fastapi import HTTPException
+        from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException
         raise HTTPException(status_code=404, detail="Trace not found")
     return {
         "trace_id": trace.trace_id,
@@ -65,5 +73,7 @@ async def get_trace(trace_id: str):
 
 
 @router.get("/stats")
-async def get_stats():
+async def get_stats(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return dashboard_manager.get_stats()

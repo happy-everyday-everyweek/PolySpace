@@ -5,7 +5,8 @@ import uuid
 from pathlib import Path
 from typing import Optional
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, Depends
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -16,6 +17,8 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 
 @router.post("/upload")
 async def upload_pdf(file: UploadFile = File(...)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if not file.filename:
         raise HTTPException(status_code=400, detail="No filename provided")
     _, ext = os.path.splitext(file.filename.lower())
@@ -38,7 +41,9 @@ async def upload_pdf(file: UploadFile = File(...)):
 
 
 @router.get("/info/{file_id}")
-async def get_pdf_info(file_id: str):
+async def get_pdf_info(file_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -84,6 +89,8 @@ async def get_pdf_info(file_id: str):
 
 @router.get("/page/{file_id}/{page_num}")
 async def get_page_image(file_id: str, page_num: int, dpi: int = Query(150, ge=72, le=300)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import base64
@@ -111,6 +118,8 @@ async def get_page_image(file_id: str, page_num: int, dpi: int = Query(150, ge=7
 
 @router.get("/text/{file_id}")
 async def extract_text(file_id: str, pages: Optional[str] = Query(None)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -132,6 +141,8 @@ async def extract_text(file_id: str, pages: Optional[str] = Query(None)):
 
 @router.post("/watermark")
 async def add_watermark(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_id: str = Query(...),
     text: str = Query("WATERMARK"),
     opacity: float = Query(0.15, ge=0, le=1),
@@ -170,6 +181,8 @@ async def add_watermark(
 
 @router.post("/encrypt")
 async def encrypt_pdf(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_id: str = Query(...),
     password: str = Query(...),
     owner_password: Optional[str] = Query(None),
@@ -204,6 +217,8 @@ async def encrypt_pdf(
 
 @router.post("/decrypt")
 async def decrypt_pdf(file_id: str = Query(...), password: str = Query(...)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -227,6 +242,8 @@ async def decrypt_pdf(file_id: str = Query(...), password: str = Query(...)):
 
 @router.post("/merge")
 async def merge_pdfs(file_ids: list[str] = Query(...)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if len(file_ids) < 2:
         raise HTTPException(status_code=400, detail="At least 2 PDF files required")
     try:
@@ -248,6 +265,8 @@ async def merge_pdfs(file_ids: list[str] = Query(...)):
 
 @router.post("/split")
 async def split_pdf(file_id: str = Query(...), pages: str = Query(...)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -268,6 +287,8 @@ async def split_pdf(file_id: str = Query(...), pages: str = Query(...)):
 
 @router.post("/rotate")
 async def rotate_pdf(file_id: str = Query(...), angle: int = Query(90), pages: Optional[str] = Query(None)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     if angle not in (90, 180, 270):
         raise HTTPException(status_code=400, detail="Angle must be 90, 180, or 270")
     file_path = _find_pdf(file_id)
@@ -293,6 +314,8 @@ async def rotate_pdf(file_id: str = Query(...), angle: int = Query(90), pages: O
 
 @router.post("/compress")
 async def compress_pdf(file_id: str = Query(...), quality: str = Query("medium")):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -318,6 +341,8 @@ async def compress_pdf(file_id: str = Query(...), quality: str = Query("medium")
 
 @router.post("/convert")
 async def convert_pdf(file_id: str = Query(...), format: str = Query("images"), dpi: int = Query(150)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     if format == "docx":
         from app.services.doc_conversion_service import doc_conversion_service
@@ -364,6 +389,8 @@ async def convert_pdf(file_id: str = Query(...), format: str = Query("images"), 
 
 @router.post("/page-numbers")
 async def add_page_numbers(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_id: str = Query(...),
     format: str = Query("1/N"),
     position: str = Query("bottom-center"),
@@ -409,6 +436,8 @@ async def add_page_numbers(
 
 @router.post("/header-footer")
 async def add_header_footer(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_id: str = Query(...),
     header: str = Query(""),
     footer: str = Query(""),
@@ -445,6 +474,8 @@ async def add_header_footer(
 
 @router.post("/redact")
 async def redact_pdf(file_id: str = Query(...), texts: list[str] = Query(...), color: str = Query("#000000")):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -470,6 +501,8 @@ async def redact_pdf(file_id: str = Query(...), texts: list[str] = Query(...), c
 
 @router.post("/bookmark")
 async def manage_bookmark(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_id: str = Query(...),
     action: str = Query("add"),
     title: str = Query(""),
@@ -515,6 +548,8 @@ async def manage_bookmark(
 
 @router.post("/annotate")
 async def annotate_pdf(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_id: str = Query(...),
     page_num: int = Query(0),
     annotation_type: str = Query("highlight"),
@@ -579,6 +614,8 @@ async def annotate_pdf(
 
 @router.post("/metadata")
 async def update_metadata(file_id: str = Query(...), title: str = Query(""), author: str = Query(""), subject: str = Query(""), keywords: str = Query("")):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     file_path = _find_pdf(file_id)
     try:
         import fitz
@@ -605,7 +642,9 @@ async def update_metadata(file_id: str = Query(...), title: str = Query(""), aut
 
 
 @router.get("/download/{file_id}")
-async def download_pdf(file_id: str):
+async def download_pdf(file_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from fastapi.responses import FileResponse
     file_path = _find_pdf(file_id)
     return FileResponse(file_path, media_type="application/pdf", filename=file_id)

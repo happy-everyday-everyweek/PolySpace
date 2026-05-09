@@ -1,7 +1,8 @@
 import logging
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, HTTPException, Depends
 from pydantic import BaseModel
 
 from ...services.ai_workspace_service import AIWorkspaceService
@@ -207,7 +208,9 @@ def _handle_ai_error(action: str, e: Exception) -> dict:
 
 
 @router.post("/video/analyze")
-async def ai_video_analyze(req: VideoAnalyzeRequest):
+async def ai_video_analyze(req: VideoAnalyzeRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_video_analyze(req.video_info)
     except Exception as e:
@@ -215,7 +218,9 @@ async def ai_video_analyze(req: VideoAnalyzeRequest):
 
 
 @router.post("/video/subtitles")
-async def ai_generate_subtitles(req: SubtitleRequest):
+async def ai_generate_subtitles(req: SubtitleRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_generate_subtitles(req.transcription, req.language)
     except Exception as e:
@@ -223,7 +228,9 @@ async def ai_generate_subtitles(req: SubtitleRequest):
 
 
 @router.post("/document/assist")
-async def ai_document_assist(req: DocumentAssistRequest):
+async def ai_document_assist(req: DocumentAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_document_assist(
             req.action, req.content, req.context, req.operation_path
@@ -233,7 +240,9 @@ async def ai_document_assist(req: DocumentAssistRequest):
 
 
 @router.post("/ppt/assist")
-async def ai_ppt_assist(req: PPTAssistRequest):
+async def ai_ppt_assist(req: PPTAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_ppt_assist(req.action, req.params)
     except Exception as e:
@@ -241,7 +250,9 @@ async def ai_ppt_assist(req: PPTAssistRequest):
 
 
 @router.post("/excel/assist")
-async def ai_excel_assist(req: ExcelAssistRequest):
+async def ai_excel_assist(req: ExcelAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_excel_assist(req.action, req.params)
     except Exception as e:
@@ -249,7 +260,9 @@ async def ai_excel_assist(req: ExcelAssistRequest):
 
 
 @router.post("/calendar/assist")
-async def ai_calendar_assist(req: CalendarAssistRequest):
+async def ai_calendar_assist(req: CalendarAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_calendar_assist(req.action, req.params)
     except Exception as e:
@@ -257,7 +270,9 @@ async def ai_calendar_assist(req: CalendarAssistRequest):
 
 
 @router.post("/knowledge/assist")
-async def ai_knowledge_assist(req: KnowledgeAssistRequest):
+async def ai_knowledge_assist(req: KnowledgeAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_knowledge_assist(req.action, req.params)
     except Exception as e:
@@ -265,7 +280,9 @@ async def ai_knowledge_assist(req: KnowledgeAssistRequest):
 
 
 @router.post("/todo/assist")
-async def ai_todo_assist(req: TodoAssistRequest):
+async def ai_todo_assist(req: TodoAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_todo_assist(req.action, req.params)
     except Exception as e:
@@ -273,7 +290,9 @@ async def ai_todo_assist(req: TodoAssistRequest):
 
 
 @router.post("/email/assist")
-async def ai_email_assist(req: EmailAssistRequest):
+async def ai_email_assist(req: EmailAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_email_assist(req.action, req.params)
     except Exception as e:
@@ -281,7 +300,9 @@ async def ai_email_assist(req: EmailAssistRequest):
 
 
 @router.post("/memo/assist")
-async def ai_memo_assist(req: MemoAssistRequest):
+async def ai_memo_assist(req: MemoAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_memo_assist(req.action, req.params)
     except Exception as e:
@@ -289,7 +310,9 @@ async def ai_memo_assist(req: MemoAssistRequest):
 
 
 @router.post("/kanban/assist")
-async def ai_kanban_assist(req: KanbanAssistRequest):
+async def ai_kanban_assist(req: KanbanAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_kanban_assist(req.action, req.params)
     except Exception as e:
@@ -297,7 +320,9 @@ async def ai_kanban_assist(req: KanbanAssistRequest):
 
 
 @router.post("/recorder/assist")
-async def ai_recorder_assist(req: RecorderAssistRequest):
+async def ai_recorder_assist(req: RecorderAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_recorder_assist(req.action, req.params)
     except Exception as e:
@@ -310,7 +335,9 @@ class TTSGenerateRequest(BaseModel):
 
 
 @router.post("/tts/generate")
-async def tts_generate(req: TTSGenerateRequest):
+async def tts_generate(req: TTSGenerateRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.services.tts_service import tts_service
         audio_data = await tts_service.generate(req.text, req.voice)
@@ -321,7 +348,9 @@ async def tts_generate(req: TTSGenerateRequest):
 
 
 @router.post("/weather/assist")
-async def ai_weather_assist(req: WeatherAssistRequest):
+async def ai_weather_assist(req: WeatherAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_weather_assist(req.action, req.params)
     except Exception as e:
@@ -329,7 +358,9 @@ async def ai_weather_assist(req: WeatherAssistRequest):
 
 
 @router.post("/weather/search")
-async def weather_search_city(req: WeatherSearchRequest):
+async def weather_search_city(req: WeatherSearchRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.services.weather_service import weather_service
         results = await weather_service.search_city(req.name, req.count, req.language)
@@ -339,7 +370,9 @@ async def weather_search_city(req: WeatherSearchRequest):
 
 
 @router.post("/weather/forecast")
-async def weather_forecast(req: WeatherDataRequest):
+async def weather_forecast(req: WeatherDataRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.services.weather_service import weather_service
         return await weather_service.get_forecast(req.latitude, req.longitude, req.forecast_days)
@@ -348,7 +381,9 @@ async def weather_forecast(req: WeatherDataRequest):
 
 
 @router.post("/weather/current")
-async def weather_current(req: WeatherDataRequest):
+async def weather_current(req: WeatherDataRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.services.weather_service import weather_service
         return await weather_service.get_current_weather(req.latitude, req.longitude)
@@ -357,7 +392,9 @@ async def weather_current(req: WeatherDataRequest):
 
 
 @router.post("/weather/air-quality")
-async def weather_air_quality(req: AirQualityRequest):
+async def weather_air_quality(req: AirQualityRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.services.weather_service import weather_service
         return await weather_service.get_air_quality(req.latitude, req.longitude)
@@ -366,7 +403,9 @@ async def weather_air_quality(req: AirQualityRequest):
 
 
 @router.post("/ppt/summary")
-async def ai_ppt_summary(req: PPTSummaryRequest):
+async def ai_ppt_summary(req: PPTSummaryRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_ppt_summary(req.slides)
     except Exception as e:
@@ -374,7 +413,9 @@ async def ai_ppt_summary(req: PPTSummaryRequest):
 
 
 @router.post("/mindmap/assist")
-async def ai_mindmap_assist(req: MindMapAssistRequest):
+async def ai_mindmap_assist(req: MindMapAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_mindmap_assist(req.action, req.params)
     except Exception as e:
@@ -382,7 +423,9 @@ async def ai_mindmap_assist(req: MindMapAssistRequest):
 
 
 @router.post("/notes/assist")
-async def ai_notes_assist(req: NotesAssistRequest):
+async def ai_notes_assist(req: NotesAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_notes_assist(req.action, req.params)
     except Exception as e:
@@ -390,7 +433,9 @@ async def ai_notes_assist(req: NotesAssistRequest):
 
 
 @router.post("/contacts/assist")
-async def ai_contacts_assist(req: ContactsAssistRequest):
+async def ai_contacts_assist(req: ContactsAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_contacts_assist(req.action, req.params)
     except Exception as e:
@@ -398,7 +443,9 @@ async def ai_contacts_assist(req: ContactsAssistRequest):
 
 
 @router.post("/focus/assist")
-async def ai_focus_assist(req: FocusAssistRequest):
+async def ai_focus_assist(req: FocusAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_focus_assist(req.action, req.params)
     except Exception as e:
@@ -406,7 +453,9 @@ async def ai_focus_assist(req: FocusAssistRequest):
 
 
 @router.post("/image/assist")
-async def ai_image_assist(req: ImageAssistRequest):
+async def ai_image_assist(req: ImageAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_image_assist(req.action, req.params)
     except Exception as e:
@@ -414,7 +463,9 @@ async def ai_image_assist(req: ImageAssistRequest):
 
 
 @router.post("/reader/assist")
-async def ai_reader_assist(req: ReaderAssistRequest):
+async def ai_reader_assist(req: ReaderAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_reader_assist(req.action, req.params)
     except Exception as e:
@@ -422,7 +473,9 @@ async def ai_reader_assist(req: ReaderAssistRequest):
 
 
 @router.post("/code/assist")
-async def ai_code_assist(req: CodeAssistRequest):
+async def ai_code_assist(req: CodeAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_code_assist(req.action, req.params)
     except Exception as e:
@@ -430,7 +483,9 @@ async def ai_code_assist(req: CodeAssistRequest):
 
 
 @router.post("/dev/assist")
-async def ai_dev_assist(req: CodeAssistRequest):
+async def ai_dev_assist(req: CodeAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_dev_assist(req.action, req.params)
     except Exception as e:
@@ -438,7 +493,9 @@ async def ai_dev_assist(req: CodeAssistRequest):
 
 
 @router.post("/design/assist")
-async def ai_design_assist(req: CodeAssistRequest):
+async def ai_design_assist(req: CodeAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_design_assist(req.action, req.params)
     except Exception as e:
@@ -446,7 +503,9 @@ async def ai_design_assist(req: CodeAssistRequest):
 
 
 @router.post("/finance/assist")
-async def ai_finance_assist(req: FinanceAssistRequest):
+async def ai_finance_assist(req: FinanceAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_finance_assist(req.action, req.params)
     except Exception as e:
@@ -454,7 +513,9 @@ async def ai_finance_assist(req: FinanceAssistRequest):
 
 
 @router.post("/calculator/assist")
-async def ai_calculator_assist(req: CalculatorAssistRequest):
+async def ai_calculator_assist(req: CalculatorAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_calculator_assist(req.action, req.params)
     except Exception as e:
@@ -462,7 +523,9 @@ async def ai_calculator_assist(req: CalculatorAssistRequest):
 
 
 @router.post("/music/assist")
-async def ai_music_assist(req: MusicAssistRequest):
+async def ai_music_assist(req: MusicAssistRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         return await _get_service().ai_music_assist(req.action, req.params)
     except Exception as e:
@@ -470,7 +533,9 @@ async def ai_music_assist(req: MusicAssistRequest):
 
 
 @router.post("/video/export")
-async def video_export(req: VideoExportRequest):
+async def video_export(req: VideoExportRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         if not video_service.ffmpeg_available:
@@ -498,7 +563,9 @@ async def video_export(req: VideoExportRequest):
 
 
 @router.post("/video/projects")
-async def create_video_project(req: VideoProjectCreateRequest):
+async def create_video_project(req: VideoProjectCreateRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         project = await video_service.create_project(req.title, req.input_files)
@@ -513,7 +580,9 @@ async def create_video_project(req: VideoProjectCreateRequest):
 
 
 @router.get("/video/projects")
-async def list_video_projects():
+async def list_video_projects(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         projects = await video_service.list_projects()
@@ -534,7 +603,9 @@ async def list_video_projects():
 
 
 @router.get("/video/projects/{project_id}")
-async def get_video_project(project_id: str):
+async def get_video_project(project_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         project = await video_service.get_project(project_id)
@@ -557,7 +628,9 @@ async def get_video_project(project_id: str):
 
 
 @router.delete("/video/projects/{project_id}")
-async def delete_video_project(project_id: str):
+async def delete_video_project(project_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         deleted = await video_service.delete_project(project_id)
@@ -571,7 +644,9 @@ async def delete_video_project(project_id: str):
 
 
 @router.post("/video/projects/{project_id}/operations")
-async def add_video_operation(project_id: str, req: VideoProjectOperationRequest):
+async def add_video_operation(project_id: str, req: VideoProjectOperationRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         project = await video_service.add_operation(project_id, req.operation)
@@ -585,7 +660,9 @@ async def add_video_operation(project_id: str, req: VideoProjectOperationRequest
 
 
 @router.post("/video/process")
-async def video_process(req: VideoProcessRequest):
+async def video_process(req: VideoProcessRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from ...services.video_service import video_service
         if not video_service.ffmpeg_available:
@@ -624,7 +701,9 @@ class DesignExportRequest(BaseModel):
 
 
 @router.post("/design/export")
-async def design_export(req: DesignExportRequest):
+async def design_export(req: DesignExportRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.core.tools.open_design_tool import OpenDesignProcessManager
 
@@ -664,7 +743,9 @@ async def design_export(req: DesignExportRequest):
 
 
 @router.post("/design/daemon/start")
-async def design_daemon_start():
+async def design_daemon_start(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.core.tools.open_design_tool import OpenDesignProcessManager
 
@@ -676,7 +757,9 @@ async def design_daemon_start():
 
 
 @router.get("/design/daemon/status")
-async def design_daemon_status():
+async def design_daemon_status(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.core.tools.open_design_tool import OpenDesignProcessManager
 
@@ -687,7 +770,9 @@ async def design_daemon_status():
 
 
 @router.post("/dev/daemon/start")
-async def dev_daemon_start():
+async def dev_daemon_start(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.core.tools.nocobase_tool import NocoBaseProcessManager
 
@@ -699,7 +784,9 @@ async def dev_daemon_start():
 
 
 @router.get("/dev/daemon/status")
-async def dev_daemon_status():
+async def dev_daemon_status(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     try:
         from app.core.tools.nocobase_tool import NocoBaseProcessManager
 

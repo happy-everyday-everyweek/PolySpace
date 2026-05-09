@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter, File, HTTPException, Query, UploadFile
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, File, HTTPException, Query, UploadFile, Depends
 from pydantic import BaseModel
 
 from ...services.kanban_service import KanbanService
@@ -151,7 +152,9 @@ class SyncStatusRequest(BaseModel):
 # ── Task Lists ────────────────────────────────────────────────
 
 @router.post("/lists")
-async def create_list(req: TaskListCreate):
+async def create_list(req: TaskListCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.create_list(
         name=req.name, parent_id=req.parent_id,
         color=req.color, icon=req.icon, sort_order=req.sort_order,
@@ -160,11 +163,15 @@ async def create_list(req: TaskListCreate):
 
 @router.get("/lists")
 async def list_lists(parent_id: Optional[int] = Query(None)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"lists": await todo_service.list_lists(parent_id=parent_id)}
 
 
 @router.get("/lists/{list_id}")
-async def get_list(list_id: int):
+async def get_list(list_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await todo_service.get_list(list_id)
     if not result:
         raise HTTPException(status_code=404, detail="List not found")
@@ -172,7 +179,9 @@ async def get_list(list_id: int):
 
 
 @router.put("/lists/{list_id}")
-async def update_list(list_id: int, req: TaskListUpdate):
+async def update_list(list_id: int, req: TaskListUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     updates = {k: v for k, v in req.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -183,7 +192,9 @@ async def update_list(list_id: int, req: TaskListUpdate):
 
 
 @router.delete("/lists/{list_id}")
-async def delete_list(list_id: int):
+async def delete_list(list_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await todo_service.delete_list(list_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="List not found")
@@ -193,7 +204,9 @@ async def delete_list(list_id: int):
 # ── Tasks ─────────────────────────────────────────────────────
 
 @router.post("/items")
-async def create_task(task: TaskCreate):
+async def create_task(task: TaskCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.create_task(
         title=task.title, description=task.description,
         priority=task.priority, importance=task.importance,
@@ -207,17 +220,23 @@ async def create_task(task: TaskCreate):
 
 
 @router.post("/items/smart")
-async def create_task_smart(req: SmartCreate):
+async def create_task_smart(req: SmartCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.create_task_smart(text=req.text, source=req.source)
 
 
 @router.post("/items/parse")
-async def parse_smart_text(req: SmartCreate):
+async def parse_smart_text(req: SmartCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return todo_service.parse_smart_text(req.text)
 
 
 @router.get("/items")
 async def list_tasks(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     status: Optional[str] = Query(None),
     priority: Optional[str] = Query(None),
     list_id: Optional[int] = Query(None),
@@ -242,7 +261,9 @@ async def list_tasks(
 
 
 @router.get("/items/{task_id}")
-async def get_task(task_id: int):
+async def get_task(task_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     task = await todo_service.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -250,7 +271,9 @@ async def get_task(task_id: int):
 
 
 @router.put("/items/{task_id}")
-async def update_task(task_id: int, update: TaskUpdate):
+async def update_task(task_id: int, update: TaskUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     updates = {k: v for k, v in update.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -261,7 +284,9 @@ async def update_task(task_id: int, update: TaskUpdate):
 
 
 @router.put("/items/{task_id}/complete")
-async def complete_task(task_id: int):
+async def complete_task(task_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await todo_service.complete_task(task_id)
     if not result:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -271,7 +296,9 @@ async def complete_task(task_id: int):
 
 
 @router.put("/items/{task_id}/reopen")
-async def reopen_task(task_id: int):
+async def reopen_task(task_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await todo_service.reopen_task(task_id)
     if not result:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -281,7 +308,9 @@ async def reopen_task(task_id: int):
 
 
 @router.delete("/items/{task_id}")
-async def delete_task(task_id: int):
+async def delete_task(task_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await todo_service.delete_task(task_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -289,37 +318,49 @@ async def delete_task(task_id: int):
 
 
 @router.get("/stats")
-async def get_task_stats():
+async def get_task_stats(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.get_task_stats()
 
 
 @router.get("/overdue")
-async def get_overdue_tasks():
+async def get_overdue_tasks(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     tasks = await todo_service.get_overdue()
     return {"tasks": tasks}
 
 
 @router.get("/calendar/{date}")
-async def get_tasks_by_date(date: str):
+async def get_tasks_by_date(date: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     tasks = await todo_service.get_tasks_by_date(date)
     return {"tasks": tasks}
 
 
 @router.get("/calendar/{start}/{end}")
-async def get_tasks_by_date_range(start: str, end: str):
+async def get_tasks_by_date_range(start: str, end: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     tasks = await todo_service.get_tasks_by_date_range(start, end)
     return {"tasks": tasks}
 
 
 @router.get("/quadrant")
-async def get_quadrant_tasks():
+async def get_quadrant_tasks(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.get_quadrant_tasks()
 
 
 # ── Subtasks ──────────────────────────────────────────────────
 
 @router.post("/items/{task_id}/subtasks")
-async def add_subtask(task_id: int, req: SubtaskCreate):
+async def add_subtask(task_id: int, req: SubtaskCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     task = await todo_service.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -328,7 +369,9 @@ async def add_subtask(task_id: int, req: SubtaskCreate):
 
 
 @router.put("/subtasks/{subtask_id}")
-async def update_subtask(subtask_id: int, req: SubtaskUpdate):
+async def update_subtask(subtask_id: int, req: SubtaskUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     updates = {k: v for k, v in req.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -339,7 +382,9 @@ async def update_subtask(subtask_id: int, req: SubtaskUpdate):
 
 
 @router.delete("/subtasks/{subtask_id}")
-async def delete_subtask(subtask_id: int):
+async def delete_subtask(subtask_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await todo_service.delete_subtask(subtask_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Subtask not found")
@@ -349,7 +394,9 @@ async def delete_subtask(subtask_id: int):
 # ── Reminders ─────────────────────────────────────────────────
 
 @router.post("/items/{task_id}/reminders")
-async def add_reminder(task_id: int, req: ReminderCreate):
+async def add_reminder(task_id: int, req: ReminderCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     task = await todo_service.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -362,7 +409,9 @@ async def add_reminder(task_id: int, req: ReminderCreate):
 
 
 @router.delete("/reminders/{reminder_id}")
-async def delete_reminder(reminder_id: int):
+async def delete_reminder(reminder_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await todo_service.delete_reminder(reminder_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Reminder not found")
@@ -370,13 +419,17 @@ async def delete_reminder(reminder_id: int):
 
 
 @router.get("/reminders/pending")
-async def get_pending_reminders():
+async def get_pending_reminders(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     reminders = await todo_service.get_pending_reminders()
     return {"reminders": reminders}
 
 
 @router.put("/reminders/{reminder_id}/triggered")
-async def mark_reminder_triggered(reminder_id: int):
+async def mark_reminder_triggered(reminder_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     ok = await todo_service.mark_reminder_triggered(reminder_id)
     if not ok:
         raise HTTPException(status_code=404, detail="Reminder not found")
@@ -387,6 +440,8 @@ async def mark_reminder_triggered(reminder_id: int):
 
 @router.post("/items/{task_id}/attachments")
 async def add_attachment(task_id: int, file: UploadFile = File(...)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     task = await todo_service.get_task(task_id)
     if not task:
         raise HTTPException(status_code=404, detail="Task not found")
@@ -421,7 +476,9 @@ async def add_attachment(task_id: int, file: UploadFile = File(...)):
 
 
 @router.delete("/attachments/{attachment_id}")
-async def delete_attachment(attachment_id: int):
+async def delete_attachment(attachment_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await todo_service.delete_attachment(attachment_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Attachment not found")
@@ -431,7 +488,9 @@ async def delete_attachment(attachment_id: int):
 # ── Habits ────────────────────────────────────────────────────
 
 @router.post("/habits")
-async def create_habit(req: HabitCreate):
+async def create_habit(req: HabitCreate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.create_habit(
         title=req.title, description=req.description,
         frequency=req.frequency, target_days=req.target_days,
@@ -441,12 +500,16 @@ async def create_habit(req: HabitCreate):
 
 
 @router.get("/habits")
-async def list_habits():
+async def list_habits(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"habits": await todo_service.list_habits()}
 
 
 @router.get("/habits/{habit_id}")
-async def get_habit(habit_id: int):
+async def get_habit(habit_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     habit = await todo_service.get_habit(habit_id)
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
@@ -454,7 +517,9 @@ async def get_habit(habit_id: int):
 
 
 @router.put("/habits/{habit_id}")
-async def update_habit(habit_id: int, req: HabitUpdate):
+async def update_habit(habit_id: int, req: HabitUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     updates = {k: v for k, v in req.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -465,7 +530,9 @@ async def update_habit(habit_id: int, req: HabitUpdate):
 
 
 @router.delete("/habits/{habit_id}")
-async def delete_habit(habit_id: int):
+async def delete_habit(habit_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await todo_service.delete_habit(habit_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Habit not found")
@@ -473,7 +540,9 @@ async def delete_habit(habit_id: int):
 
 
 @router.post("/habits/{habit_id}/checkin")
-async def checkin_habit(habit_id: int, req: HabitCheckin):
+async def checkin_habit(habit_id: int, req: HabitCheckin, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     habit = await todo_service.get_habit(habit_id)
     if not habit:
         raise HTTPException(status_code=404, detail="Habit not found")
@@ -481,7 +550,9 @@ async def checkin_habit(habit_id: int, req: HabitCheckin):
 
 
 @router.delete("/habits/{habit_id}/checkin/{date}")
-async def uncheckin_habit(habit_id: int, date: str):
+async def uncheckin_habit(habit_id: int, date: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     ok = await todo_service.uncheckin_habit(habit_id, date)
     if not ok:
         raise HTTPException(status_code=404, detail="Checkin not found")
@@ -491,12 +562,16 @@ async def uncheckin_habit(habit_id: int, date: str):
 # ── Pomodoro ──────────────────────────────────────────────────
 
 @router.get("/pomodoro/settings")
-async def get_pomodoro_settings():
+async def get_pomodoro_settings(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.get_pomodoro_settings()
 
 
 @router.put("/pomodoro/settings")
-async def update_pomodoro_settings(req: PomodoroSettingsUpdate):
+async def update_pomodoro_settings(req: PomodoroSettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     updates = {k: v for k, v in req.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(status_code=400, detail="No fields to update")
@@ -504,7 +579,9 @@ async def update_pomodoro_settings(req: PomodoroSettingsUpdate):
 
 
 @router.post("/pomodoro/start")
-async def start_pomodoro(req: PomodoroStart):
+async def start_pomodoro(req: PomodoroStart, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await todo_service.create_pomodoro_session(
         task_id=req.task_id, habit_id=req.habit_id,
         focus_duration=req.focus_duration, break_duration=req.break_duration,
@@ -514,7 +591,9 @@ async def start_pomodoro(req: PomodoroStart):
 
 
 @router.put("/pomodoro/{session_id}/complete")
-async def complete_pomodoro(session_id: int):
+async def complete_pomodoro(session_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await todo_service.complete_pomodoro_session(session_id)
     if not result:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -522,7 +601,9 @@ async def complete_pomodoro(session_id: int):
 
 
 @router.put("/pomodoro/{session_id}/cancel")
-async def cancel_pomodoro(session_id: int):
+async def cancel_pomodoro(session_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     result = await todo_service.cancel_pomodoro_session(session_id)
     if not result:
         raise HTTPException(status_code=404, detail="Session not found")
@@ -531,6 +612,8 @@ async def cancel_pomodoro(session_id: int):
 
 @router.get("/pomodoro/sessions")
 async def list_pomodoro_sessions(task_id: Optional[int] = Query(None), limit: int = Query(50)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     sessions = await todo_service.list_pomodoro_sessions(task_id=task_id, limit=limit)
     return {"sessions": sessions}
 
@@ -538,7 +621,9 @@ async def list_pomodoro_sessions(task_id: Optional[int] = Query(None), limit: in
 # ── Kanban Bridge ─────────────────────────────────────────────
 
 @router.post("/kanban-bridge/to-kanban")
-async def todo_to_kanban(req: TodoToKanbanRequest):
+async def todo_to_kanban(req: TodoToKanbanRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     todo = await todo_service.get_task(req.todo_id)
     if not todo:
         raise HTTPException(status_code=404, detail="Todo not found")
@@ -587,7 +672,9 @@ async def todo_to_kanban(req: TodoToKanbanRequest):
 
 
 @router.post("/kanban-bridge/to-todo")
-async def kanban_to_todo(req: KanbanToTodoRequest):
+async def kanban_to_todo(req: KanbanToTodoRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     board = await kanban_service.get_board(req.board_id)
     if not board:
         raise HTTPException(status_code=404, detail="Kanban board not found")
@@ -640,7 +727,9 @@ async def kanban_to_todo(req: KanbanToTodoRequest):
 
 
 @router.post("/kanban-bridge/sync-status")
-async def sync_todo_kanban_status(req: SyncStatusRequest):
+async def sync_todo_kanban_status(req: SyncStatusRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     todo = await todo_service.get_task(req.todo_id)
     if not todo:
         raise HTTPException(status_code=404, detail="Todo not found")
@@ -681,7 +770,9 @@ async def sync_todo_kanban_status(req: SyncStatusRequest):
 
 
 @router.get("/kanban-bridge/linked/{card_id}")
-async def get_linked_todos(card_id: int):
+async def get_linked_todos(card_id: int, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     todos = await todo_service.get_linked_todos(card_id)
     return {"todos": todos}
 

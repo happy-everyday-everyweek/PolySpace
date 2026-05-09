@@ -4,7 +4,8 @@ import json
 import logging
 from typing import Optional
 
-from fastapi import APIRouter
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.responses import StreamingResponse
 from pydantic import BaseModel
 
@@ -26,7 +27,9 @@ class LLMProxyRequest(BaseModel):
 
 
 @router.post("/proxy/stream")
-async def llm_proxy_stream(req: LLMProxyRequest):
+async def llm_proxy_stream(req: LLMProxyRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     dispatcher = get_model_dispatcher()
 
     messages = list(req.messages)
@@ -95,26 +98,34 @@ async def llm_proxy_stream(req: LLMProxyRequest):
 
 
 @router.post("/proxy/anthropic/stream")
-async def llm_proxy_anthropic_stream(req: LLMProxyRequest):
+async def llm_proxy_anthropic_stream(req: LLMProxyRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     req.provider = "anthropic"
     req.task_category = req.task_category or TaskCategory.PLANNING
     return await llm_proxy_stream(req)
 
 
 @router.post("/proxy/openai/stream")
-async def llm_proxy_openai_stream(req: LLMProxyRequest):
+async def llm_proxy_openai_stream(req: LLMProxyRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     req.provider = "openai"
     return await llm_proxy_stream(req)
 
 
 @router.post("/proxy/azure/stream")
-async def llm_proxy_azure_stream(req: LLMProxyRequest):
+async def llm_proxy_azure_stream(req: LLMProxyRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     req.provider = "azure"
     return await llm_proxy_stream(req)
 
 
 @router.post("/proxy/google/stream")
-async def llm_proxy_google_stream(req: LLMProxyRequest):
+async def llm_proxy_google_stream(req: LLMProxyRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     req.provider = "google"
     req.task_category = req.task_category or TaskCategory.MULTIMODAL
     return await llm_proxy_stream(req)

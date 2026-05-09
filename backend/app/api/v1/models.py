@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
 from app.config import settings
@@ -20,7 +21,9 @@ class ModelConfigRequest(BaseModel):
 
 
 @router.get("/config")
-async def get_model_config():
+async def get_model_config(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "base_model": settings.LLM_BASE_MODEL,
         "strong_model": settings.LLM_STRONG_MODEL,
@@ -32,12 +35,16 @@ async def get_model_config():
 
 
 @router.post("/config")
-async def update_model_config(request: ModelConfigRequest):
+async def update_model_config(request: ModelConfigRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {"status": "ok", "model": request.name, "tier": request.tier}
 
 
 @router.get("/tiers")
-async def get_model_tiers():
+async def get_model_tiers(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "tiers": [
             {"name": "base", "description": "Base model (required)"},

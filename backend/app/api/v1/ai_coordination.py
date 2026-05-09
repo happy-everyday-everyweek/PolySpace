@@ -1,8 +1,9 @@
 from typing import Any
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 
+from app.api.v1.auth import get_current_user
 from app.services.coordination_service import CoordinationService, get_coordination_service
 from app.services.email.ai_service import AIEmailService, get_ai_email_service
 

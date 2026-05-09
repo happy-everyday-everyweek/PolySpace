@@ -3,7 +3,8 @@ from __future__ import annotations
 from datetime import datetime
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, HTTPException, Query, Depends
 from pydantic import BaseModel
 
 from app.core.audit.models import AuditCategory
@@ -34,6 +35,8 @@ class IntegrityCheckParams(BaseModel):
 
 @router.get("/logs")
 async def query_audit_logs(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     category: Optional[str] = Query(None, description="Filter by category"),
     level: Optional[str] = Query(None, description="Filter by level"),
     actor_type: Optional[str] = Query(None, description="Filter by actor type"),
@@ -78,7 +81,9 @@ async def query_audit_logs(
 
 
 @router.get("/trace/{trace_id}")
-async def get_trace_chain(trace_id: str):
+async def get_trace_chain(trace_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     chain = await audit_service.get_trace_chain(trace_id)
     if not chain:
         raise HTTPException(status_code=404, detail=f"Trace not found: {trace_id}")
@@ -86,7 +91,9 @@ async def get_trace_chain(trace_id: str):
 
 
 @router.post("/verify")
-async def verify_integrity(params: IntegrityCheckParams):
+async def verify_integrity(params: IntegrityCheckParams, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     parsed_start = None
     parsed_end = None
     if params.start_time:
@@ -109,6 +116,8 @@ async def verify_integrity(params: IntegrityCheckParams):
 
 @router.get("/stats")
 async def get_audit_stats(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     start_time: Optional[str] = Query(None),
     end_time: Optional[str] = Query(None),
 ):
@@ -133,7 +142,9 @@ async def get_audit_stats(
 
 
 @router.get("/categories")
-async def list_audit_categories():
+async def list_audit_categories(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return {
         "categories": [
             {"value": c.value, "name": c.name}

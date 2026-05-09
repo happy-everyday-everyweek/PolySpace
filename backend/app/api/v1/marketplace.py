@@ -1,6 +1,7 @@
 from typing import Optional
 
-from fastapi import APIRouter, HTTPException, Query
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, HTTPException, Query, Depends
 
 from app.services.skill_marketplace_service import (
     SkillCategory,
@@ -14,6 +15,8 @@ router = APIRouter()
 
 @router.get("/skills")
 async def list_marketplace_skills(
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     category: Optional[SkillCategory] = None,
     search: Optional[str] = None,
     sort_by: str = Query("downloads", pattern="^(downloads|rating|newest)$"),
@@ -25,7 +28,9 @@ async def list_marketplace_skills(
 
 
 @router.get("/skills/{skill_id}")
-async def get_marketplace_skill(skill_id: str):
+async def get_marketplace_skill(skill_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     skill = await skill_marketplace_service.get_skill(skill_id)
     if not skill:
         raise HTTPException(status_code=404, detail="Skill not found")
@@ -33,13 +38,17 @@ async def get_marketplace_skill(skill_id: str):
 
 
 @router.post("/skills")
-async def publish_skill(req: SkillPublishRequest):
+async def publish_skill(req: SkillPublishRequest, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     skill = await skill_marketplace_service.publish(req)
     return skill.model_dump()
 
 
 @router.post("/skills/{skill_id}/install")
-async def install_skill(skill_id: str):
+async def install_skill(skill_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     installed = await skill_marketplace_service.install(skill_id)
     if not installed:
         raise HTTPException(status_code=404, detail="Skill not found")
@@ -47,7 +56,9 @@ async def install_skill(skill_id: str):
 
 
 @router.post("/skills/{skill_id}/uninstall")
-async def uninstall_skill(skill_id: str):
+async def uninstall_skill(skill_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     uninstalled = await skill_marketplace_service.uninstall(skill_id)
     if not uninstalled:
         raise HTTPException(status_code=404, detail="Skill not installed")
@@ -55,13 +66,17 @@ async def uninstall_skill(skill_id: str):
 
 
 @router.get("/installed")
-async def list_installed_skills():
+async def list_installed_skills(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     skills = await skill_marketplace_service.list_installed()
     return {"skills": [s.model_dump() for s in skills]}
 
 
 @router.post("/skills/{skill_id}/review")
-async def review_skill(skill_id: str, req: SkillReviewRequest, user_id: str = ""):
+async def review_skill(skill_id: str, req: SkillReviewRequest, user_id: str = "", user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     skill = await skill_marketplace_service.review(skill_id, user_id, req)
     if not skill:
         raise HTTPException(status_code=404, detail="Skill not found")
@@ -69,7 +84,9 @@ async def review_skill(skill_id: str, req: SkillReviewRequest, user_id: str = ""
 
 
 @router.delete("/skills/{skill_id}")
-async def delete_marketplace_skill(skill_id: str):
+async def delete_marketplace_skill(skill_id: str, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     deleted = await skill_marketplace_service.delete_skill(skill_id)
     if not deleted:
         raise HTTPException(status_code=404, detail="Skill not found")

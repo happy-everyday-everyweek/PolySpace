@@ -2,7 +2,8 @@ import json
 import os
 from typing import Any, Optional
 
-from fastapi import APIRouter
+from app.api.v1.auth import get_current_user
+from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from sqlalchemy import select
 
@@ -199,7 +200,9 @@ def _apply_distributed_update(update: DistributedSettingsUpdate) -> DistributedC
 
 
 @router.get("/")
-async def get_settings():
+async def get_settings(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     config = _get_distributed_config()
     general = await _get_setting("general")
     agent = await _get_setting("agent")
@@ -224,7 +227,9 @@ async def get_settings():
 
 
 @router.put("/general")
-async def update_general_settings(update: GeneralSettingsUpdate):
+async def update_general_settings(update: GeneralSettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     current = await _get_setting("general")
     updates = update.model_dump(exclude_none=True)
     current.update(updates)
@@ -233,7 +238,9 @@ async def update_general_settings(update: GeneralSettingsUpdate):
 
 
 @router.put("/agent")
-async def update_agent_settings(update: AgentSettingsUpdate):
+async def update_agent_settings(update: AgentSettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     current = await _get_setting("agent")
     updates = update.model_dump(exclude_none=True)
     current.update(updates)
@@ -242,7 +249,9 @@ async def update_agent_settings(update: AgentSettingsUpdate):
 
 
 @router.put("/app")
-async def update_app_settings(update: AppSettingsUpdate):
+async def update_app_settings(update: AppSettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     current = await _get_setting("app")
     updates = update.model_dump(exclude_none=True)
     current.update(updates)
@@ -251,7 +260,9 @@ async def update_app_settings(update: AppSettingsUpdate):
 
 
 @router.get("/models")
-async def get_model_settings():
+async def get_model_settings(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.llm.config_store import get_model_config_store
     store = get_model_config_store()
     result = store.get_flat_config()
@@ -290,7 +301,9 @@ async def get_model_settings():
 
 
 @router.put("/models")
-async def update_model_settings(update: ModelConfigUpdate):
+async def update_model_settings(update: ModelConfigUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.llm.config_store import get_model_config_store
     from app.dependencies import container
     updates = update.model_dump(exclude_none=True)
@@ -321,7 +334,9 @@ async def update_model_settings(update: ModelConfigUpdate):
 
 
 @router.put("/distributed")
-async def update_distributed_settings(update: DistributedSettingsUpdate):
+async def update_distributed_settings(update: DistributedSettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     config = _apply_distributed_update(update)
     return {
         "status": "ok",
@@ -341,7 +356,9 @@ async def update_distributed_settings(update: DistributedSettingsUpdate):
 
 
 @router.get("/persona")
-async def get_persona_settings():
+async def get_persona_settings(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.personality.persona_core import get_persona_core
     persona = get_persona_core()
     config = persona.config
@@ -373,7 +390,9 @@ async def get_persona_settings():
 
 
 @router.put("/persona")
-async def update_persona_settings(update: PersonaSettingsModel):
+async def update_persona_settings(update: PersonaSettingsModel, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.personality.persona_core import get_persona_core
     persona = get_persona_core()
     updates = update.model_dump(exclude_none=True)
@@ -382,7 +401,9 @@ async def update_persona_settings(update: PersonaSettingsModel):
 
 
 @router.get("/capabilities")
-async def get_capability_settings():
+async def get_capability_settings(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.capability.registry import capability_registry
     provider_settings = await _get_setting("capability_providers")
     source_summary = capability_registry.get_summary_by_source()
@@ -404,7 +425,9 @@ async def get_capability_settings():
 
 
 @router.put("/capabilities")
-async def update_capability_settings(update: CapabilityProviderSettingsUpdate):
+async def update_capability_settings(update: CapabilityProviderSettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     current = await _get_setting("capability_providers")
     updates = update.model_dump(exclude_none=True)
     current.update(updates)
@@ -413,7 +436,9 @@ async def update_capability_settings(update: CapabilityProviderSettingsUpdate):
 
 
 @router.get("/env")
-async def get_env_variables():
+async def get_env_variables(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.config.env_store import get_env_store
     store = get_env_store()
     return {
@@ -427,7 +452,9 @@ class EnvVariableUpdate(BaseModel):
 
 
 @router.put("/env")
-async def update_env_variables(body: EnvVariableUpdate):
+async def update_env_variables(body: EnvVariableUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     from app.core.config.env_store import get_env_store
     store = get_env_store()
     changed = store.update(body.updates)
@@ -448,12 +475,16 @@ class MemorySettingsUpdate(BaseModel):
 
 
 @router.get("/memory")
-async def get_memory_settings():
+async def get_memory_settings(user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     return await _get_setting("memory")
 
 
 @router.put("/memory")
-async def update_memory_settings(update: MemorySettingsUpdate):
+async def update_memory_settings(update: MemorySettingsUpdate, user=Depends(get_current_user)):
+    if not user:
+        raise HTTPException(status_code=401, detail="Not authenticated")
     current = await _get_setting("memory")
     updates = update.model_dump(exclude_none=True)
     current.update(updates)
