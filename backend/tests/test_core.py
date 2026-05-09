@@ -206,3 +206,34 @@ class TestSafeEvaluator:
     def test_float_numbers(self):
         assert self.safe_eval("3.14 + 2.86") == 6.0
         assert self.safe_eval("10.5 / 2") == 5.25
+
+
+class TestChatServiceFewShotInjection:
+    def test_no_hardcoded_fewshot_in_messages(self):
+        from app.services.chat_service import ChatService
+        from app.core.llm.dispatcher import ModelDispatcher, TaskCategory
+        from app.core.tool.registry import ToolRegistry
+        from app.core.memory.manager import MemoryManager
+        from app.core.personality.heartflow import HeartFlow
+        from app.core.personality.expression import ExpressionLearner
+        from app.core.personality.greeting import GreetingManager
+        from app.core.safety.policies import PolicyEngine
+        from app.core.safety.confirmation import ConfirmationManager
+        from app.core.safety.monitor import RuntimeMonitor
+        import inspect
+
+        source = inspect.getsource(ChatService.process_message_stream)
+
+        assert "帮我写一份周报" not in source, (
+            "Hardcoded few-shot example '帮我写一份周报' should not be in source code"
+        )
+        assert "task_demo" not in source, (
+            "Hardcoded task_demo ID should not be in source code"
+        )
+        assert "fewshot" not in source.lower(), (
+            "Hardcoded few-shot examples should not be in source code"
+        )
+
+        assert "llm_messages.insert" not in source, (
+            "No hardcoded message insertions should be present in process_message_stream"
+        )
