@@ -39,6 +39,7 @@ class ProcessStatus(str, Enum):
 
 class OpenDesignProcessManager:
     _instance: OpenDesignProcessManager | None = None
+    _instance_lock = asyncio.Lock()
 
     def __init__(self) -> None:
         self._process: subprocess.Popen | None = None
@@ -47,11 +48,13 @@ class OpenDesignProcessManager:
         self._host = OPEN_DESIGN_DEFAULT_HOST
         self._base_url = f"http://{self._host}:{self._port}"
         self._client: httpx.AsyncClient | None = None
+        self._state_lock = asyncio.Lock()
 
     @classmethod
-    def get_instance(cls) -> OpenDesignProcessManager:
-        if cls._instance is None:
-            cls._instance = cls()
+    async def get_instance(cls) -> OpenDesignProcessManager:
+        async with cls._instance_lock:
+            if cls._instance is None:
+                cls._instance = cls()
         return cls._instance
 
     @property
@@ -231,26 +234,32 @@ class OpenDesignTool(BaseTool):
                 "Manages the Open Design daemon as a subprocess."
             ),
         )
-        self._manager = OpenDesignProcessManager.get_instance()
+        self._manager: OpenDesignProcessManager | None = None
 
     async def _on_activate(self) -> None:
-        pass
+        self._manager = await OpenDesignProcessManager.get_instance()
+
+    async def _get_manager(self) -> OpenDesignProcessManager:
+        if self._manager is None:
+            self._manager = await OpenDesignProcessManager.get_instance()
+        return self._manager
 
     async def _on_call(self, **kwargs: Any) -> Any:
         action = kwargs.get("action", "")
+        manager = await self._get_manager()
 
         if action == "start_daemon":
-            return await self._manager.start(kwargs.get("port"))
+            return await manager.start(kwargs.get("port"))
         elif action == "stop_daemon":
-            return await self._manager.stop()
+            return await manager.stop()
         elif action == "daemon_status":
-            return self._manager.get_status()
+            return manager.get_status()
         elif action == "ensure_running":
-            return await self._manager.ensure_running()
+            return await manager.ensure_running()
 
         if action not in ("start_daemon", "stop_daemon", "daemon_status", "ensure_running"):
-            if not self._manager.is_running():
-                start_result = await self._manager.ensure_running()
+            if not manager.is_running():
+                start_result = await manager.ensure_running()
                 if start_result.get("status") not in ("running", "already_running"):
                     return {"error": "Open Design daemon is not running", "start_result": start_result}
 
@@ -284,75 +293,92 @@ class OpenDesignTool(BaseTool):
         return {"error": f"Unknown action: {action}. Available: {', '.join(handlers.keys())}"}
 
     async def _list_skills(self, **kwargs: Any) -> Any:
-        return await self._manager.api_request("GET", "/api/skills")
+        manager = await self._get_manager()
+        return await manager.api_request("GET", "/api/skills")
 
     async def _get_skill(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         skill_id = kwargs.get("skill_id", "")
-        return await self._manager.api_request("GET", f"/api/skills/{skill_id}")
+        return await manager.api_request("GET", f"/api/skills/{skill_id}")
 
     async def _list_design_systems(self, **kwargs: Any) -> Any:
-        return await self._manager.api_request("GET", "/api/design-systems")
+        manager = await self._get_manager()
+        return await manager.api_request("GET", "/api/design-systems")
 
     async def _get_design_system(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         ds_id = kwargs.get("design_system_id", "")
-        return await self._manager.api_request("GET", f"/api/design-systems/{ds_id}")
+        return await manager.api_request("GET", f"/api/design-systems/{ds_id}")
 
     async def _list_projects(self, **kwargs: Any) -> Any:
-        return await self._manager.api_request("GET", "/api/projects")
+        manager = await self._get_manager()
+        return await manager.api_request("GET", "/api/projects")
 
     async def _create_project(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         data = kwargs.get("data", {})
-        return await self._manager.api_request("POST", "/api/projects", json=data)
+        return await manager.api_request("POST", "/api/projects", json=data)
 
     async def _get_project(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
-        return await self._manager.api_request("GET", f"/api/projects/{project_id}")
+        return await manager.api_request("GET", f"/api/projects/{project_id}")
 
     async def _delete_project(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
-        return await self._manager.api_request("DELETE", f"/api/projects/{project_id}")
+        return await manager.api_request("DELETE", f"/api/projects/{project_id}")
 
     async def _list_conversations(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
-        return await self._manager.api_request("GET", f"/api/projects/{project_id}/conversations")
+        return await manager.api_request("GET", f"/api/projects/{project_id}/conversations")
 
     async def _create_conversation(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
         data = kwargs.get("data", {})
-        return await self._manager.api_request(
+        return await manager.api_request(
             "POST", f"/api/projects/{project_id}/conversations", json=data
         )
 
     async def _list_project_files(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
-        return await self._manager.api_request("GET", f"/api/projects/{project_id}/files")
+        return await manager.api_request("GET", f"/api/projects/{project_id}/files")
 
     async def _read_project_file(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
         file_path = kwargs.get("file_path", "")
-        return await self._manager.api_request("GET", f"/api/projects/{project_id}/files/{file_path}")
+        return await manager.api_request("GET", f"/api/projects/{project_id}/files/{file_path}")
 
     async def _save_artifact(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         data = kwargs.get("data", {})
-        return await self._manager.api_request("POST", "/api/artifacts/save", json=data)
+        return await manager.api_request("POST", "/api/artifacts/save", json=data)
 
     async def _lint_artifact(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         data = kwargs.get("data", {})
-        return await self._manager.api_request("POST", "/api/artifacts/lint", json=data)
+        return await manager.api_request("POST", "/api/artifacts/lint", json=data)
 
     async def _list_media_models(self, **kwargs: Any) -> Any:
-        return await self._manager.api_request("GET", "/api/media/models")
+        manager = await self._get_manager()
+        return await manager.api_request("GET", "/api/media/models")
 
     async def _generate_media(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
         data = kwargs.get("data", {})
-        return await self._manager.api_request(
+        return await manager.api_request(
             "POST", f"/api/projects/{project_id}/media/generate", json=data
         )
 
     async def _export_html(self, **kwargs: Any) -> Any:
+        manager = await self._get_manager()
         project_id = kwargs.get("project_id", "")
-        return await self._manager.api_request("GET", f"/api/projects/{project_id}/archive")
+        return await manager.api_request("GET", f"/api/projects/{project_id}/archive")
 
     async def _export_pdf(self, **kwargs: Any) -> Any:
         project_id = kwargs.get("project_id", "")
@@ -381,7 +407,9 @@ class OpenDesignTool(BaseTool):
         }
 
     async def _health(self, **kwargs: Any) -> Any:
-        return await self._manager.api_request("GET", "/api/health")
+        manager = await self._get_manager()
+        return await manager.api_request("GET", "/api/health")
 
     async def _on_hibernate(self) -> None:
-        await self._manager.stop()
+        if self._manager:
+            await self._manager.stop()

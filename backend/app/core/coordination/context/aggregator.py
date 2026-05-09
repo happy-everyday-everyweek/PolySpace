@@ -103,9 +103,13 @@ class ContextAggregator:
 
     def _cleanup_seen_hashes(self) -> None:
         now = time.time()
-        expired = [h for h, ts in self._seen_hashes.items() if (now - ts) > self._hash_ttl]
-        for h in expired:
-            del self._seen_hashes[h]
+        asyncio.create_task(self._async_cleanup_seen_hashes(now))
+
+    async def _async_cleanup_seen_hashes(self, now: float) -> None:
+        async with self._lock:
+            expired = [h for h, ts in self._seen_hashes.items() if (now - ts) > self._hash_ttl]
+            for h in expired:
+                del self._seen_hashes[h]
 
     def subscribe(self, callback) -> None:
         self._subscribers.append(callback)

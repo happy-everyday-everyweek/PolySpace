@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import os
@@ -96,6 +97,7 @@ class AuthService:
         self._users: dict[str, User] = {}
         self._tokens: dict[str, str] = {}
         self._shared_workspaces: dict[str, SharedWorkspace] = {}
+        self._lock = asyncio.Lock()
         self._load_all()
 
     def _load_all(self):
@@ -134,119 +136,130 @@ class AuthService:
             json.dump(ws.model_dump(), f, ensure_ascii=False, indent=2)
 
     async def register(self, req: UserCreateRequest) -> User:
-        for user in self._users.values():
-            if user.username == req.username:
-                raise ValueError("Username already exists")
-        password_hash = _hash_password(req.password)
-        user = User(
-            username=req.username,
-            email=req.email,
-            display_name=req.display_name or req.username,
-            role=req.role,
-            password_hash=password_hash,
-        )
-        self._users[user.id] = user
-        self._tokens[user.api_token] = user.id
-        self._save_user(user)
-        return user
+        async with self._lock:
+            for user in self._users.values():
+                if user.username == req.username:
+                    raise ValueError("Username already exists")
+            password_hash = _hash_password(req.password)
+            user = User(
+                username=req.username,
+                email=req.email,
+                display_name=req.display_name or req.username,
+                role=req.role,
+                password_hash=password_hash,
+            )
+            self._users[user.id] = user
+            self._tokens[user.api_token] = user.id
+            self._save_user(user)
+            return user
 
     async def login(self, req: LoginRequest) -> LoginResponse:
-        user = None
-        for u in self._users.values():
-            if u.username == req.username:
-                user = u
-                break
-        if not user or not _verify_password(req.password, user.password_hash):
-            raise ValueError("Invalid username or password")
-        if user.status == UserStatus.DISABLED:
-            raise ValueError("Account is disabled")
-        user.last_login_at = datetime.now().isoformat()
-        self._save_user(user)
-        from datetime import timedelta
-        expires = (datetime.now() + timedelta(days=7)).isoformat()
-        return LoginResponse(
-            user={"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role.value, "avatar": user.avatar},
-            token=user.api_token,
-            expires_at=expires,
-        )
+        async with self._lock:
+            user = None
+            for u in self._users.values():
+                if u.username == req.username:
+                    user = u
+                    break
+            if not user or not _verify_password(req.password, user.password_hash):
+                raise ValueError("Invalid username or password")
+            if user.status == UserStatus.DISABLED:
+                raise ValueError("Account is disabled")
+            user.last_login_at = datetime.now().isoformat()
+            self._save_user(user)
+            from datetime import timedelta
+            expires = (datetime.now() + timedelta(days=7)).isoformat()
+            return LoginResponse(
+                user={"id": user.id, "username": user.username, "display_name": user.display_name, "role": user.role.value, "avatar": user.avatar},
+                token=user.api_token,
+                expires_at=expires,
+            )
 
     async def validate_token(self, token: str) -> Optional[User]:
-        user_id = self._tokens.get(token)
-        if user_id:
-            return self._users.get(user_id)
-        return None
+        async with self._lock:
+            user_id = self._tokens.get(token)
+            if user_id:
+                return self._users.get(user_id)
+            return None
 
     async def get_user(self, user_id: str) -> Optional[User]:
-        return self._users.get(user_id)
+        async with self._lock:
+            return self._users.get(user_id)
 
     async def list_users(self) -> list[User]:
-        return list(self._users.values())
+        async with self._lock:
+            return list(self._users.values())
 
     async def update_user(self, user_id: str, req: UserUpdateRequest) -> Optional[User]:
-        user = self._users.get(user_id)
-        if not user:
-            return None
-        if req.display_name is not None:
-            user.display_name = req.display_name
-        if req.email is not None:
-            user.email = req.email
-        if req.avatar is not None:
-            user.avatar = req.avatar
-        if req.role is not None:
-            user.role = req.role
-        self._save_user(user)
-        return user
+        async with self._lock:
+            user = self._users.get(user_id)
+            if not user:
+                return None
+            if req.display_name is not None:
+                user.display_name = req.display_name
+            if req.email is not None:
+                user.email = req.email
+            if req.avatar is not None:
+                user.avatar = req.avatar
+            if req.role is not None:
+                user.role = req.role
+            self._save_user(user)
+            return user
 
     async def delete_user(self, user_id: str) -> bool:
-        if user_id in self._users:
-            user = self._users[user_id]
-            if user.api_token in self._tokens:
-                del self._tokens[user.api_token]
-            del self._users[user_id]
-            path = os.path.join(_DATA_DIR, f"{user_id}.json")
-            if os.path.exists(path):
-                os.remove(path)
-            return True
-        return False
+        async with self._lock:
+            if user_id in self._users:
+                user = self._users[user_id]
+                if user.api_token in self._tokens:
+                    del self._tokens[user.api_token]
+                del self._users[user_id]
+                path = os.path.join(_DATA_DIR, f"{user_id}.json")
+                if os.path.exists(path):
+                    os.remove(path)
+                return True
+            return False
 
     async def create_shared_workspace(self, name: str, owner_id: str, member_ids: list[str] | None = None) -> SharedWorkspace:
-        members = [{"user_id": owner_id, "role": "owner"}]
-        if member_ids:
-            for mid in member_ids:
-                if mid != owner_id:
-                    members.append({"user_id": mid, "role": "member"})
-        ws = SharedWorkspace(name=name, owner_id=owner_id, members=members)
-        self._shared_workspaces[ws.id] = ws
-        self._save_workspace(ws)
-        return ws
+        async with self._lock:
+            members = [{"user_id": owner_id, "role": "owner"}]
+            if member_ids:
+                for mid in member_ids:
+                    if mid != owner_id:
+                        members.append({"user_id": mid, "role": "member"})
+            ws = SharedWorkspace(name=name, owner_id=owner_id, members=members)
+            self._shared_workspaces[ws.id] = ws
+            self._save_workspace(ws)
+            return ws
 
     async def list_shared_workspaces(self, user_id: str) -> list[SharedWorkspace]:
-        results = []
-        for ws in self._shared_workspaces.values():
-            for member in ws.members:
-                if member.get("user_id") == user_id:
-                    results.append(ws)
-                    break
-        return results
+        async with self._lock:
+            results = []
+            for ws in self._shared_workspaces.values():
+                for member in ws.members:
+                    if member.get("user_id") == user_id:
+                        results.append(ws)
+                        break
+            return results
 
     async def add_workspace_member(self, workspace_id: str, user_id: str, role: str = "member") -> bool:
-        ws = self._shared_workspaces.get(workspace_id)
-        if not ws:
-            return False
-        for member in ws.members:
-            if member.get("user_id") == user_id:
+        async with self._lock:
+            ws = self._shared_workspaces.get(workspace_id)
+            if not ws:
                 return False
-        ws.members.append({"user_id": user_id, "role": role})
-        self._save_workspace(ws)
-        return True
+            for member in ws.members:
+                if member.get("user_id") == user_id:
+                    return False
+            ws.members.append({"user_id": user_id, "role": role})
+            self._save_workspace(ws)
+            return True
 
     async def remove_workspace_member(self, workspace_id: str, user_id: str) -> bool:
-        ws = self._shared_workspaces.get(workspace_id)
-        if not ws:
-            return False
-        ws.members = [m for m in ws.members if m.get("user_id") != user_id or m.get("role") == "owner"]
-        self._save_workspace(ws)
-        return True
+        async with self._lock:
+            ws = self._shared_workspaces.get(workspace_id)
+            if not ws:
+                return False
+            ws.members = [m for m in ws.members if m.get("user_id") != user_id or m.get("role") == "owner"]
+            self._save_workspace(ws)
+            return True
 
 
 auth_service = AuthService()
