@@ -3,6 +3,7 @@ from __future__ import annotations
 import asyncio
 import logging
 import os
+import shlex
 import shutil
 from dataclasses import dataclass, field
 from typing import Any, Optional
@@ -18,6 +19,12 @@ from app.core.capability.base import (
 )
 
 logger = logging.getLogger(__name__)
+
+_ALLOWED_COMMANDS = {
+    "git", "docker", "npm", "pip", "curl", "wget", "python", "node",
+    "ls", "cat", "echo", "pwd", "mkdir", "rm", "cp", "mv",
+    "grep", "head", "tail", "wc", "sort", "uniq"
+}
 
 _PREDEFINED_TOOLS: dict[str, dict[str, Any]] = {
     "git": {
@@ -208,6 +215,28 @@ class CLIProvider(CapabilityProvider):
             if not os.path.isfile(tool_def.path):
                 tool_def.path = shutil.which(tool_def.name) or ""
 
+    def _validate_command(self, tool_name: str, action: str, args: list) -> tuple[bool, str]:
+        if tool_name not in _ALLOWED_COMMANDS:
+            return False, f"Command '{tool_name}' is not allowed"
+        
+        if "\0" in tool_name or "\0" in action:
+            return False, "Null byte detected"
+        
+        predefined = _PREDEFINED_TOOLS.get(tool_name)
+        if predefined and action != "execute":
+            allowed_actions = predefined.get("actions", [])
+            if action not in allowed_actions:
+                return False, f"Action '{action}' is not allowed for '{tool_name}'"
+        
+        for arg in args:
+            arg_str = str(arg)
+            if "\0" in arg_str:
+                return False, "Null byte in arguments"
+            if len(arg_str) > 1024:
+                return False, "Argument too long"
+        
+        return True, ""
+
     async def execute(
         self,
         capability_name: str,
@@ -217,15 +246,26 @@ class CLIProvider(CapabilityProvider):
         tool_def = self._tools.get(capability_name)
         if not tool_def:
             return CapabilityResult(success=False, error=f"CLI tool '{capability_name}' not found")
+        
         tool_name = tool_def.name
         action = params.get("action", "execute")
         args = params.get("args", [])
+        
         if isinstance(args, str):
-            args = args.split()
+            args = shlex.split(args)
+        elif not isinstance(args, list):
+            args = []
+        
+        is_valid, error = self._validate_command(tool_name, action, args)
+        if not is_valid:
+            logger.warning(f"CLI command validation failed: {error}")
+            return CapabilityResult(success=False, error=f"Command validation failed: {error}")
+        
         cmd_args = [tool_name]
         if action != "execute":
             cmd_args.append(action)
         cmd_args.extend(args)
+        
         try:
             proc = await asyncio.create_subprocess_exec(
                 *cmd_args,

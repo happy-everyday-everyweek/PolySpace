@@ -1,12 +1,20 @@
 from __future__ import annotations
 
 import asyncio
+import os
+import shlex
 from typing import Any
 
 from app.core.tool.base import BaseTool
 
 
 class ShellTool(BaseTool):
+    _ALLOWED_COMMANDS = {
+        "ls", "cat", "echo", "pwd", "mkdir", "rm", "cp", "mv", 
+        "grep", "head", "tail", "wc", "sort", "uniq", "find",
+        "git", "docker", "npm", "pip", "python", "node", "curl", "wget"
+    }
+
     def __init__(self) -> None:
         super().__init__(
             name="shell",
@@ -16,19 +24,62 @@ class ShellTool(BaseTool):
     async def _on_activate(self) -> None:
         pass
 
+    def _sanitize_command(self, command: str) -> tuple[bool, str]:
+        if not command or len(command.strip()) > 4096:
+            return False, "Command is empty or too long"
+        
+        if "\0" in command:
+            return False, "Null byte in command"
+        
+        parts = shlex.split(command)
+        if not parts:
+            return False, "Empty command after parsing"
+        
+        base_cmd = parts[0]
+        if base_cmd not in self._ALLOWED_COMMANDS:
+            return False, f"Command '{base_cmd}' is not allowed"
+        
+        return True, ""
+
+    def _validate_working_dir(self, working_dir: str | None) -> tuple[bool, str]:
+        if working_dir is None:
+            return True, ""
+        
+        if ".." in working_dir or working_dir.startswith("/") or working_dir.startswith("\\"):
+            return False, "Invalid working directory path"
+        
+        try:
+            abs_path = os.path.abspath(working_dir)
+            if abs_path.startswith("/") and not abs_path.startswith("/workspace/"):
+                return False, "Working directory must be within workspace"
+        except Exception:
+            return False, "Invalid working directory"
+        
+        return True, ""
+
     async def _on_call(self, **kwargs: Any) -> Any:
         command = kwargs.get("command", "")
         timeout = float(kwargs.get("timeout", 30.0))
         working_dir = kwargs.get("working_dir")
 
-        if not command:
-            return {"error": "No command provided"}
+        if timeout < 1 or timeout > 300:
+            return {"error": "Timeout must be between 1 and 300 seconds"}
+
+        is_valid, error = self._sanitize_command(command)
+        if not is_valid:
+            return {"error": f"Command validation failed: {error}"}
+
+        if working_dir:
+            is_valid, error = self._validate_working_dir(working_dir)
+            if not is_valid:
+                return {"error": f"Working directory validation failed: {error}"}
 
         try:
+            shell = "bash" if __import__("platform").system() != "Windows" else "cmd"
+            flag = "-c" if __import__("platform").system() != "Windows" else "/c"
+            
             process = await asyncio.create_subprocess_exec(
-                "bash" if __import__("platform").system() != "Windows" else "cmd",
-                "-c" if __import__("platform").system() != "Windows" else "/c",
-                command,
+                shell, flag, command,
                 stdout=asyncio.subprocess.PIPE,
                 stderr=asyncio.subprocess.PIPE,
                 cwd=working_dir,
