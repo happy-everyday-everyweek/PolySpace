@@ -21,8 +21,10 @@ from pathlib import Path
 ALPINE_VERSION = "v3.21"
 ALPINE_MIRROR = "https://dl-cdn.alpinelinux.org/alpine"
 
-ASSETS_DIR = r"d:\PolySpace\android\app\src\main\assets"
-BACKEND_DIR = r"d:\PolySpace\backend"
+# 使用相对路径替代硬编码的 Windows 路径
+SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+ASSETS_DIR = os.path.join(SCRIPT_DIR, "..", "android", "app", "src", "main", "assets")
+BACKEND_DIR = os.path.join(SCRIPT_DIR, "..", "backend")
 
 WANTED_APK_PACKAGES = [
     "python3",
@@ -207,19 +209,23 @@ def download_apk_package(pkg, arch, repo_type="main"):
 
 
 def extract_apk_to_rootfs(apk_data, rootfs_dir):
+    def safe_extract(tar, target_dir):
+        for member in tar.getmembers():
+            if member.name.startswith(".PKGINFO") or member.name.startswith(".pre-") or member.name.startswith(".post-"):
+                continue
+            # 防止路径遍历漏洞
+            member_path = os.path.normpath(member.name)
+            if member_path.startswith(os.pardir) or os.path.isabs(member_path):
+                continue
+            tar.extract(member, target_dir)
+
     try:
         with tarfile.open(fileobj=io.BytesIO(apk_data), mode='r:gz') as tar:
-            for member in tar.getmembers():
-                if member.name.startswith(".PKGINFO") or member.name.startswith(".pre-") or member.name.startswith(".post-"):
-                    continue
-                tar.extract(member, rootfs_dir)
+            safe_extract(tar, rootfs_dir)
     except tarfile.ReadError:
         try:
             with tarfile.open(fileobj=io.BytesIO(apk_data), mode='r') as tar:
-                for member in tar.getmembers():
-                    if member.name.startswith(".PKGINFO") or member.name.startswith(".pre-") or member.name.startswith(".post-"):
-                        continue
-                    tar.extract(member, rootfs_dir)
+                safe_extract(tar, rootfs_dir)
         except Exception as e:
             print(f"    Warning: Could not extract APK package: {e}")
 
@@ -308,6 +314,7 @@ def pip_download_wheels(packages, target_dir, platform_tag, python_abi="cp311"):
 
 
 def build_rootfs(android_abi, output_path):
+    import tempfile
     alpine_arch = "aarch64" if android_abi == "arm64-v8a" else "x86_64"
     pip_arch_tag = "aarch64" if android_abi == "arm64-v8a" else "x86_64"
 
@@ -315,7 +322,7 @@ def build_rootfs(android_abi, output_path):
     print(f"Building rootfs for {android_abi} (Alpine arch: {alpine_arch})")
     print(f"{'='*60}")
 
-    rootfs_dir = os.path.join("D:\\tmp", f"rootfs_{alpine_arch}")
+    rootfs_dir = os.path.join(tempfile.gettempdir(), f"rootfs_{alpine_arch}")
     if os.path.exists(rootfs_dir):
         shutil.rmtree(rootfs_dir)
     os.makedirs(rootfs_dir, exist_ok=True)
@@ -356,7 +363,7 @@ def build_rootfs(android_abi, output_path):
             print(f"    WARNING: Failed to install {pkg_name}")
 
     print("[5/7] Downloading and pre-installing Python wheels...")
-    wheels_download_dir = os.path.join("D:\\tmp", f"wheels_{alpine_arch}")
+    wheels_download_dir = os.path.join(tempfile.gettempdir(), f"wheels_{alpine_arch}")
     if os.path.exists(wheels_download_dir):
         shutil.rmtree(wheels_download_dir)
     os.makedirs(wheels_download_dir, exist_ok=True)
@@ -370,13 +377,21 @@ def build_rootfs(android_abi, output_path):
     site_packages_dir = os.path.join(rootfs_dir, "usr/lib/python3.11/site-packages")
     os.makedirs(site_packages_dir, exist_ok=True)
 
+    def safe_extract_zip(zip_path, target_dir):
+        with zipfile.ZipFile(zip_path, 'r') as zf:
+            for member in zf.infolist():
+                # 防止路径遍历漏洞
+                member_path = os.path.normpath(member.filename)
+                if member_path.startswith(os.pardir) or os.path.isabs(member_path):
+                    continue
+                zf.extract(member, target_dir)
+
     print("    Pre-installing wheels into site-packages...")
     wheel_files = [f for f in os.listdir(wheels_download_dir) if f.endswith(".whl")]
     for i, whl in enumerate(wheel_files):
         whl_path = os.path.join(wheels_download_dir, whl)
         try:
-            with zipfile.ZipFile(whl_path, 'r') as zf:
-                zf.extractall(site_packages_dir)
+            safe_extract_zip(whl_path, site_packages_dir)
             print(f"    [{i+1}/{len(wheel_files)}] Installed: {whl}")
         except Exception as e:
             print(f"    [{i+1}/{len(wheel_files)}] Failed to install {whl}: {e}")
