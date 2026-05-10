@@ -1,0 +1,13 @@
+{
+  "id": "f9065e8bcf59",
+  "username": "test_user",
+  "email": null,
+  "display_name": "test_user",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "ae24f706cd8444b4b74188ab4b94ce46:3fe721956f90cc116361d6005476b04effff4bda6376690fd08d3697addf4f9b",
+  "api_token": "94c94d488986ea008b4b0aa033a12130fda276104cf879cefe8ddc7247cf947d",
+  "last_login_at": null,
+  "created_at": "2026-05-10T03:13:29.043157"
+}

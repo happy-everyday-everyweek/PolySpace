@@ -1,0 +1,13 @@
+{
+  "id": "0ce5677177a1",
+  "username": "disabled_user",
+  "email": null,
+  "display_name": "disabled_user",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "165b4b789572f372107fb5f9c0ea703b:218d91c0ffaca850d44c6e9d3fee83aaddd27a7d3962800ba3273607a623339d",
+  "api_token": "fd63c78248c54107b97bbe01ca50c4bedaa7d6e4b085fd0c5ea545d535ecdade",
+  "last_login_at": null,
+  "created_at": "2026-05-10T03:09:28.355249"
+}

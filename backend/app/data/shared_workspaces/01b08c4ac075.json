@@ -1,0 +1,17 @@
+{
+  "id": "01b08c4ac075",
+  "name": "Test Workspace 3",
+  "owner_id": "369973845872",
+  "members": [
+    {
+      "user_id": "369973845872",
+      "role": "owner"
+    },
+    {
+      "user_id": "d52aa015694f",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-10T03:13:10.278456"
+}

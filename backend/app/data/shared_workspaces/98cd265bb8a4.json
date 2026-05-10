@@ -1,0 +1,17 @@
+{
+  "id": "98cd265bb8a4",
+  "name": "Test Workspace 2",
+  "owner_id": "81f5a1b1e0ef",
+  "members": [
+    {
+      "user_id": "81f5a1b1e0ef",
+      "role": "owner"
+    },
+    {
+      "user_id": "ee4eccea5124",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-10T03:13:10.064311"
+}

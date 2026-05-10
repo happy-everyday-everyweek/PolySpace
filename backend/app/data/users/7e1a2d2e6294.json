@@ -1,0 +1,13 @@
+{
+  "id": "7e1a2d2e6294",
+  "username": "update_user_d40c8776",
+  "email": "new@email.com",
+  "display_name": "New Name",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "48f419256f3d6e70a9a400f71144a2cc:9632c41616a06290e888e1c65e0aa4a65b9bc61d1c87494c672312c06f4f93c2",
+  "api_token": "aba324b7bf954f818b193cf67631babb4dafeafdd48222e6dfa6222c0d3fb1af",
+  "last_login_at": null,
+  "created_at": "2026-05-10T03:13:26.915993"
+}
