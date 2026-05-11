@@ -316,42 +316,33 @@ class ChatService:
         logger.info("[Stream] Interaction tools: %s", tool_names or "None")
 
         if tools and not history_messages:
-            llm_messages.insert(1, {"role": "user", "content": "帮我写一份周报"})
-            llm_messages.insert(2, {
-                "role": "assistant",
-                "content": None,
-                "tool_calls": [{
+            fewshot_messages = [
+                {"role": "user", "content": "帮我写一份周报"},
+                {"role": "assistant", "content": None, "tool_calls": [{
                     "id": "fewshot_001",
                     "type": "function",
                     "function": {
                         "name": "execute_task",
                         "arguments": '{"description": "写一份周报", "goal": "完成周报内容"}',
                     },
-                }],
-            })
-            tool_result_json = json.dumps({
-                "task_id": "task_demo",
-                "status": "created",
-                "card": {
-                    "type": "task",
+                }]},
+                {"role": "tool", "tool_call_id": "fewshot_001", "content": json.dumps({
                     "task_id": "task_demo",
-                    "status": "running",
-                    "progress": 0,
-                },
-            })
-            llm_messages.insert(3, {
-                "role": "tool",
-                "tool_call_id": "fewshot_001",
-                "content": tool_result_json,
-            })
-            llm_messages.insert(4, {
-                "role": "assistant",
-                "content": (
+                    "status": "created",
+                    "card": {
+                        "type": "task",
+                        "task_id": "task_demo",
+                        "status": "running",
+                        "progress": 0,
+                    },
+                })},
+                {"role": "assistant", "content": (
                     "好的，我已经为你创建了周报任务"
                     "（任务ID: task_demo），系统正在执行中。"
                     "你可以随时补充要求或查看进度。"
-                ),
-            })
+                )},
+            ]
+            llm_messages[1:1] = fewshot_messages
 
         full_reply = ""
         tool_calls_buffer = []

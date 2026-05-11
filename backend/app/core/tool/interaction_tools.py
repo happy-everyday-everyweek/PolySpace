@@ -384,11 +384,10 @@ class ReadFileTool(BaseTool):
         return {"error": f"Could not find a file matching: {description}"}
 
     async def _find_file(self, description: str) -> str | None:
-        search_dirs = [
-            os.path.join(os.getcwd(), "data", "uploads"),
-            os.path.join(os.getcwd(), "data", "documents"),
-            os.path.join(os.getcwd(), "data", "files"),
-            os.getcwd(),
+        safe_base_dirs = [
+            os.path.realpath(os.path.join(os.getcwd(), "data", "uploads")),
+            os.path.realpath(os.path.join(os.getcwd(), "data", "documents")),
+            os.path.realpath(os.path.join(os.getcwd(), "data", "files")),
         ]
 
         desc_lower = description.lower()
@@ -396,12 +395,18 @@ class ReadFileTool(BaseTool):
 
         candidates: list[tuple[float, str]] = []
 
-        for search_dir in search_dirs:
+        for search_dir in safe_base_dirs:
             if not os.path.exists(search_dir):
                 continue
             for root, dirs, files in os.walk(search_dir):
+                real_root = os.path.realpath(root)
+                if not any(real_root.startswith(safe) for safe in safe_base_dirs):
+                    continue
                 for fname in files:
                     fpath = os.path.join(root, fname)
+                    real_fpath = os.path.realpath(fpath)
+                    if not any(real_fpath.startswith(safe) for safe in safe_base_dirs):
+                        continue
                     fname_lower = fname.lower()
                     score = 0.0
                     for kw in keywords:
@@ -415,6 +420,19 @@ class ReadFileTool(BaseTool):
 
     async def _read_file(self, file_path: str) -> dict:
         try:
+            resolved_path = os.path.realpath(file_path)
+            safe_dirs = [
+                os.path.realpath(os.path.join(os.getcwd(), "data", "uploads")),
+                os.path.realpath(os.path.join(os.getcwd(), "data", "documents")),
+                os.path.realpath(os.path.join(os.getcwd(), "data", "files")),
+                os.path.realpath(os.getcwd()),
+            ]
+            if not any(resolved_path.startswith(safe_dir) for safe_dir in safe_dirs):
+                return {"error": "Access denied: file path outside allowed directories"}
+
+            if not os.path.isfile(resolved_path):
+                return {"error": "Not a file or file does not exist"}
+
             ext = os.path.splitext(file_path)[1].lower()
 
             if ext == ".pdf":

@@ -12,6 +12,7 @@ BINARY_OPERATORS = {
     ast.Sub: operator.sub,
     ast.Mult: operator.mul,
     ast.Div: operator.truediv,
+    ast.FloorDiv: operator.floordiv,
     ast.Mod: operator.mod,
     ast.Pow: operator.pow,
     ast.USub: operator.neg,
@@ -72,6 +73,8 @@ class SafeEvaluator(ast.NodeVisitor):
         op_type = type(node.op)
         if op_type not in BINARY_OPERATORS:
             raise ValueError(f"Unsupported binary operator: {op_type.__name__}")
+        if op_type in (ast.Div, ast.FloorDiv, ast.Mod) and right == 0:
+            raise ValueError("Division or modulo by zero is not allowed")
         self._result = BINARY_OPERATORS[op_type](left, right)
         return self._result
 
