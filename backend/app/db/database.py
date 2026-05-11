@@ -49,7 +49,12 @@ async def init_db() -> None:
 async def check_db_health() -> bool:
     try:
         async with async_session() as session:
-            await session.execute(Base.metadata.tables.values().__iter__().__next__().select().limit(1))
+            tables_iter = iter(Base.metadata.tables.values())
+            first_table = next(tables_iter)
+            await session.execute(first_table.select().limit(1))
+        return True
+    except StopIteration:
+        logger.warning("No tables defined in database schema")
         return True
     except Exception as e:
         logger.error("Database health check failed: %s", e)

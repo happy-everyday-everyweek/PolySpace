@@ -206,3 +206,22 @@ class TestSafeEvaluator:
     def test_float_numbers(self):
         assert self.safe_eval("3.14 + 2.86") == 6.0
         assert self.safe_eval("10.5 / 2") == 5.25
+
+
+class TestDatabaseHealth:
+    def test_check_db_health_no_tables(self):
+        from app.db.database import check_db_health
+        from app.models.tables import Base
+        original_tables = Base.metadata.tables
+        try:
+            Base.metadata.tables = {}
+            result = check_db_health()
+            assert result is True
+        finally:
+            Base.metadata.tables = original_tables
+
+    @pytest.mark.asyncio
+    async def test_check_db_health_async(self):
+        from app.db.database import check_db_health
+        result = await check_db_health()
+        assert result is True
