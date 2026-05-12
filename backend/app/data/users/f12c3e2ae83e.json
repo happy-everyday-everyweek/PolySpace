@@ -1,0 +1,13 @@
+{
+  "id": "f12c3e2ae83e",
+  "username": "member_list",
+  "email": null,
+  "display_name": "member_list",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "33cc0b5b9b7cd903e486bf3e77a7e219:2b0d1fe70e352246222dd104b9b293073fc78392275485de66fe0f79110524bf",
+  "api_token": "d7239a8e31df7ae7d8be51006aad9dd670d7b2170042318e45d99f09123ed8ef",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:04.386710"
+}

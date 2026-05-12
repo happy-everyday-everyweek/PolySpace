@@ -1,0 +1,13 @@
+{
+  "id": "c3f3d70dfe11",
+  "username": "loginuser_1afc6673",
+  "email": null,
+  "display_name": "loginuser_1afc6673",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "4137feedabc67234714e786dfadead0b:16db8009f3438b7927f30575ba434e0a5d89ab4c9c3c62ed114f2d3c839ade6a",
+  "api_token": "43a47969f00b39a8570b340a28d5ef580d04bdd933e1d150783595fe443d347f",
+  "last_login_at": "2026-05-12T02:17:04.090545",
+  "created_at": "2026-05-12T02:17:04.063505"
+}

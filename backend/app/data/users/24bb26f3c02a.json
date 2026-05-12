@@ -1,0 +1,13 @@
+{
+  "id": "24bb26f3c02a",
+  "username": "dup_member",
+  "email": null,
+  "display_name": "dup_member",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "ebe4759750fdeafd999247e86295e383:4d3731582df01dead40c7f19028f03edf6b5ec4ee2b464b4536677bd234e1815",
+  "api_token": "16270eae048879fe2c63c4707beab12e1fd7578de99930f378c8a57c580fa33f",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:04.508369"
+}

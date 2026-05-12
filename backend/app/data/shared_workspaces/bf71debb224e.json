@@ -1,0 +1,17 @@
+{
+  "id": "bf71debb224e",
+  "name": "Member Workspace",
+  "owner_id": "8e315ff498de",
+  "members": [
+    {
+      "user_id": "8e315ff498de",
+      "role": "owner"
+    },
+    {
+      "user_id": "f12c3e2ae83e",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:13:04.387009"
+}

@@ -1,0 +1,17 @@
+{
+  "id": "e9443c544866",
+  "name": "Member Workspace 17a5e3d7",
+  "owner_id": "6d87f646a39a",
+  "members": [
+    {
+      "user_id": "6d87f646a39a",
+      "role": "owner"
+    },
+    {
+      "user_id": "cb0cac7584c5",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:18:11.794990"
+}

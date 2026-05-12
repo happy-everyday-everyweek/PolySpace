@@ -1,0 +1,17 @@
+{
+  "id": "c1ef0218d72e",
+  "name": "Add Member WS ba539103",
+  "owner_id": "2040bdf6d3b7",
+  "members": [
+    {
+      "user_id": "2040bdf6d3b7",
+      "role": "owner"
+    },
+    {
+      "user_id": "a79963c8996d",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:18:11.869121"
+}

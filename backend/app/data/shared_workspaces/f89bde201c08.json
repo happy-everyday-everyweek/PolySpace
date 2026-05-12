@@ -1,0 +1,21 @@
+{
+  "id": "f89bde201c08",
+  "name": "Team Workspace 3ebfc52e",
+  "owner_id": "7ed28674b1c0",
+  "members": [
+    {
+      "user_id": "7ed28674b1c0",
+      "role": "owner"
+    },
+    {
+      "user_id": "f6a20a8df6da",
+      "role": "member"
+    },
+    {
+      "user_id": "e49ed487353d",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:18:11.676242"
+}

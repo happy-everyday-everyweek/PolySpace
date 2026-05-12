@@ -1,0 +1,13 @@
+{
+  "id": "c9f127aba135",
+  "username": "updateuser",
+  "email": null,
+  "display_name": "New Display Name",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "a320f81333c4e45b934cd993171c2e6c:6ceca774fd201d120c4cd97643d3b5d7cded39ef568b152aeccc72279fe91d44",
+  "api_token": "c0ba91dbc5a3692b4d0cba6f3b196e26bd53aff6885b67d270931eaf7a3a360b",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:03.895087"
+}

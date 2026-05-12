@@ -1,0 +1,17 @@
+{
+  "id": "290e6da969ba",
+  "name": "Dup WS e048016c",
+  "owner_id": "382d28b2d75f",
+  "members": [
+    {
+      "user_id": "382d28b2d75f",
+      "role": "owner"
+    },
+    {
+      "user_id": "d3619992c176",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:18:45.794525"
+}

@@ -1,0 +1,13 @@
+{
+  "id": "6f3fc5cfeb5b",
+  "username": "new_member",
+  "email": null,
+  "display_name": "new_member",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "ff4891a59f90a4b940f63a87672e13e9:3b0e56558e18d31f46e64cacbc5ae3e2e00e2c5193af223a4972a731b567f4e4",
+  "api_token": "ee87f40db356398219b63363144d099124c892d1c274bb6a15e5d00af63b97d7",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:04.447063"
+}

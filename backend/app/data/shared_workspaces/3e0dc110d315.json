@@ -1,0 +1,17 @@
+{
+  "id": "3e0dc110d315",
+  "name": "Member Workspace fef4515b",
+  "owner_id": "2204b8cf9ab9",
+  "members": [
+    {
+      "user_id": "2204b8cf9ab9",
+      "role": "owner"
+    },
+    {
+      "user_id": "d2fdae112f80",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:17:05.233350"
+}

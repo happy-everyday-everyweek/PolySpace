@@ -1,0 +1,13 @@
+{
+  "id": "4068826a64ba",
+  "username": "testuser",
+  "email": null,
+  "display_name": "testuser",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "2966309cd7f3b40118d8d26d266183c4:6c2d0c81d867e0e7d3f05c1666ad2b294b1576e35558d4137495e8e126e1c354",
+  "api_token": "691630bd196fcbf253693c2ba48e2bdc1145e75231e7bb022a5fe65c38f830db",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:03.562731"
+}

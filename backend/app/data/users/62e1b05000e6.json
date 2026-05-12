@@ -1,0 +1,13 @@
+{
+  "id": "62e1b05000e6",
+  "username": "remove_member",
+  "email": null,
+  "display_name": "remove_member",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "d376030b679389cd0c67c8fd2579f526:4317971aef65d2d5aa0d50e7cecb0927a4e58060c799a686aa61380f291f8198",
+  "api_token": "68e4ad638decb69aeba09f4163acc7b43361c6eab9daef969039755522642be7",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:04.569713"
+}

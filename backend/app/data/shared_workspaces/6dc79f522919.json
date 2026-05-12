@@ -1,0 +1,17 @@
+{
+  "id": "6dc79f522919",
+  "name": "Add Member WS 0ef45581",
+  "owner_id": "045b2be1ec16",
+  "members": [
+    {
+      "user_id": "045b2be1ec16",
+      "role": "owner"
+    },
+    {
+      "user_id": "04427e48b4c6",
+      "role": "member"
+    }
+  ],
+  "permissions": {},
+  "created_at": "2026-05-12T02:17:05.313022"
+}

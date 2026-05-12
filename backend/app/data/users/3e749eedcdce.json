@@ -1,0 +1,13 @@
+{
+  "id": "3e749eedcdce",
+  "username": "roleuser",
+  "email": null,
+  "display_name": "roleuser",
+  "avatar": null,
+  "role": "admin",
+  "status": "active",
+  "password_hash": "e5981c92842f9705ec34633a4956a430:1f7d961da785b685b81bfb7691aaedb7a4171f0d3ceffdd720a048652db1bb37",
+  "api_token": "c8d1180de4315c578792feb7efb6848504ecd257c7862232d4e188f3ef909b78",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:03.957414"
+}

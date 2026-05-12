@@ -1,0 +1,13 @@
+{
+  "id": "e1ae1c2fb34d",
+  "username": "emailuser",
+  "email": "new@email.com",
+  "display_name": "emailuser",
+  "avatar": null,
+  "role": "member",
+  "status": "active",
+  "password_hash": "c8b1a8691e0a9a79dd65f0ea6fa71467:ce4a410e4875da4723f6c6f8e4eaa3de1b6e7aba1d9e4aa11a0cb8ba79a412d6",
+  "api_token": "5273aa1377b4926800e411bda03912b3a110f865f1577fcb88eb7c5079894040",
+  "last_login_at": null,
+  "created_at": "2026-05-12T02:13:03.926233"
+}
