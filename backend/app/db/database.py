@@ -49,7 +49,9 @@ async def init_db() -> None:
 async def check_db_health() -> bool:
     try:
         async with async_session() as session:
-            await session.execute(Base.metadata.tables.values().__iter__().__next__().select().limit(1))
+            tables = list(Base.metadata.tables.values())
+            if tables:
+                await session.execute(tables[0].select().limit(1))
         return True
     except Exception as e:
         logger.error("Database health check failed: %s", e)

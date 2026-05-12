@@ -220,10 +220,6 @@ class SyncService:
             self._changes[device_id] = []
         self._changes[device_id].extend(sync_changes)
 
-        max_per_device = 500
-        if len(self._changes[device_id]) > max_per_device:
-            self._changes[device_id] = self._changes[device_id][-max_per_device:]
-
         device.last_sync = datetime.now().isoformat()
         self._save_state()
 

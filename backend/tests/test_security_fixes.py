@@ -165,3 +165,58 @@ class TestOpenDesignProcessManagerSingleton:
         instances = await asyncio.gather(*[get_instance() for _ in range(5)])
         
         assert all(instance is instances[0] for instance in instances)
+
+
+class TestSyncServiceDataIntegrity:
+    @pytest.mark.asyncio
+    async def test_sync_service_no_data_truncation(self):
+        from app.services.sync_service import SyncService
+        
+        service = SyncService(data_dir="/tmp/test_sync_truncation")
+        
+        device = await service.register_device(
+            device_id="test_device",
+            device_name="Test Device"
+        )
+        
+        for i in range(600):
+            await service.push_changes("test_device", [{
+                "path": "settings",
+                "content": f"content_{i}",
+                "type": "update"
+            }])
+        
+        changes = service._changes.get("test_device", [])
+        assert len(changes) == 600, f"Expected 600 changes, got {len(changes)}. Data truncation detected!"
+
+
+class TestDatabaseHealthCheck:
+    @pytest.mark.asyncio
+    async def test_db_health_check_no_crash(self):
+        from app.db.database import check_db_health
+        
+        result = await check_db_health()
+        assert isinstance(result, bool)
+
+
+class TestTodoServiceDatabaseInit:
+    @pytest.mark.asyncio
+    async def test_todo_service_database_initialized(self):
+        from app.services.todo_service import TodoService
+        
+        import tempfile
+        import os
+        
+        temp_db = os.path.join(tempfile.gettempdir(), f"test_todo_{os.getpid()}.db")
+        if os.path.exists(temp_db):
+            os.remove(temp_db)
+        
+        try:
+            service = TodoService(db_path=temp_db)
+            
+            task = await service.create_task(title="Test Task")
+            assert task is not None
+            assert task.get("title") == "Test Task"
+        finally:
+            if os.path.exists(temp_db):
+                os.remove(temp_db)
